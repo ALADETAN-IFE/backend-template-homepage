@@ -1,6 +1,27 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+
+const useScrollAnimation = () => {
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-fade-in-up')
+          }
+        })
+      },
+      { threshold: 0.1 }
+    )
+
+    document.querySelectorAll('[data-scroll]').forEach((el) => {
+      observer.observe(el)
+    })
+
+    return () => observer.disconnect()
+  }, [])
+}
 
 const IconArrow = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,11 +65,96 @@ const IconCheck = () => (
   </svg>
 )
 
+const IconClose = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  </svg>
+)
+
+const WorkflowModal = ({ path, onClose }: { path: 'monolith' | 'microservices'; onClose: () => void }) => {
+  const workflows = {
+    monolith: {
+      title: 'Monolith Workflow',
+      prompts: [
+        { q: 'Project name?', a: 'my-api' },
+        { q: 'TypeScript or JavaScript?', a: 'TypeScript' },
+        { q: 'Database?', a: 'PostgreSQL' },
+        { q: 'Authentication?', a: 'JWT' },
+        { q: 'Include testing?', a: 'Jest' },
+        { q: 'Add documentation?', a: 'Swagger' },
+      ]
+    },
+    microservices: {
+      title: 'Microservices Workflow',
+      prompts: [
+        { q: 'Service name?', a: 'user-service' },
+        { q: 'TypeScript or JavaScript?', a: 'TypeScript' },
+        { q: 'Database?', a: 'PostgreSQL' },
+        { q: 'Authentication?', a: 'JWT' },
+        { q: 'Include Docker?', a: 'Yes' },
+        { q: 'Service mesh?', a: 'PM2' },
+        { q: 'Include testing?', a: 'Jest' },
+        { q: 'Add documentation?', a: 'Swagger' },
+      ]
+    }
+  }
+
+  const workflow = workflows[path]
+
+  return (
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div
+        className="bg-card border border-accent/30 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto space-y-6 p-8 animate-fade-in-up"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <h2 className="text-3xl font-bold">{workflow.title}</h2>
+          <button onClick={onClose} className="text-muted-foreground hover:text-accent transition">
+            <IconClose />
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <p className="text-muted-foreground">Complete CLI workflow with all prompts:</p>
+          <div className="space-y-3">
+            {workflow.prompts.map((item, idx) => (
+              <div key={idx} className="bg-secondary/50 border border-border rounded-lg p-4 space-y-2">
+                <div className="flex items-start gap-3">
+                  <div className="text-sm font-mono text-accent min-w-fit">→</div>
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground">{item.q}</p>
+                    <p className="font-mono text-accent text-sm mt-1">{item.a}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="bg-accent/10 border border-accent/30 rounded-lg p-4 space-y-2">
+          <p className="text-sm font-semibold">Result:</p>
+          <p className="text-sm text-muted-foreground">Production-ready {path} backend with all selected features, ready to deploy.</p>
+        </div>
+
+        <button
+          onClick={onClose}
+          className="w-full px-6 py-3 bg-accent text-primary font-semibold rounded-lg hover:bg-cyan-300 transition-all duration-200"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function Home() {
   const [copied, setCopied] = useState(false)
+  const [selectedPath, setSelectedPath] = useState<'monolith' | 'microservices' | null>(null)
+
+  useScrollAnimation()
 
   const copyCommand = () => {
-    navigator.clipboard.writeText('npx @ifecodes/backend-template my-project')
+    navigator.clipboard.writeText('npx @ifecodes/backend-template@latest my-project')
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -136,7 +242,7 @@ export default function Home() {
                   {copied ? '✓ Copied!' : '$ Click to copy'}
                 </p>
                 <pre className="text-sm md:text-base text-accent font-mono overflow-x-auto">
-                  npx @ifecodes/backend-template my-project
+                  npx @ifecodes/backend-template@latest my-project
                 </pre>
               </button>
             </div>
@@ -154,7 +260,7 @@ export default function Home() {
               { icon: '✓', title: 'Best Practices', desc: 'Built by experienced developers. Error handling, logging, security included.' },
               { icon: '📈', title: 'Scalable', desc: 'Monolith or microservices. Grow from MVP to production without rebuilding.' },
             ].map((item, idx) => (
-              <div key={idx} className="space-y-4 animate-fade-in-up" style={{ animationDelay: `${0.1 * idx}s`, animationFillMode: 'both' }}>
+              <div key={idx} className="space-y-4 opacity-0" data-scroll style={{ animationDelay: `${0.1 * idx}s` }}>
                 <div className="text-4xl">{item.icon}</div>
                 <h3 className="text-xl font-semibold">{item.title}</h3>
                 <p className="text-muted-foreground leading-relaxed">{item.desc}</p>
@@ -181,8 +287,9 @@ export default function Home() {
               return (
                 <div
                   key={idx}
-                  className="space-y-4 p-6 rounded-lg border border-border hover:border-accent/50 bg-card/50 hover:bg-card transition-all duration-300 animate-fade-in-up"
-                  style={{ animationDelay: `${0.08 * idx}s`, animationFillMode: 'both' }}
+                  className="space-y-4 p-6 rounded-lg border border-border hover:border-accent/50 bg-card/50 hover:bg-card transition-all duration-300 opacity-0"
+                  data-scroll
+                  style={{ animationDelay: `${0.08 * idx}s` }}
                 >
                   <div className="w-12 h-12 bg-accent/15 rounded-lg flex items-center justify-center text-accent group-hover:text-accent">
                     <Icon />
@@ -227,11 +334,12 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-20 text-pretty">Choose Your Path</h2>
           <div className="grid md:grid-cols-2 gap-8">
-            <div
-              className="border border-border rounded-lg p-8 space-y-6 hover:border-border transition-all duration-300 animate-fade-in-up"
+            <button
+              onClick={() => setSelectedPath('monolith')}
+              className="border border-border rounded-lg p-8 space-y-6 hover:border-accent/50 hover:bg-secondary/30 transition-all duration-300 animate-fade-in-up text-left cursor-pointer group"
               style={{ animationDelay: '0s', animationFillMode: 'both' }}
             >
-              <h3 className="text-2xl font-bold">Monolith</h3>
+              <h3 className="text-2xl font-bold group-hover:text-accent transition">Monolith</h3>
               <p className="text-muted-foreground">Perfect for MVPs and small to medium projects</p>
               <ul className="space-y-3">
                 {['Single codebase', 'Easier to debug', 'Lower DevOps complexity', 'Shared database'].map((item) => (
@@ -243,13 +351,17 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-            </div>
+              <div className="pt-4 text-xs text-accent group-hover:text-cyan-300 transition">
+                Click to see complete workflow →
+              </div>
+            </button>
 
-            <div
-              className="border border-accent/50 bg-accent/5 rounded-lg p-8 space-y-6 hover:border-accent transition-all duration-300 animate-fade-in-up"
+            <button
+              onClick={() => setSelectedPath('microservices')}
+              className="border border-accent/50 bg-accent/5 rounded-lg p-8 space-y-6 hover:border-accent hover:bg-accent/10 transition-all duration-300 animate-fade-in-up text-left cursor-pointer group"
               style={{ animationDelay: '0.1s', animationFillMode: 'both' }}
             >
-              <h3 className="text-2xl font-bold">Microservices</h3>
+              <h3 className="text-2xl font-bold group-hover:text-cyan-300 transition">Microservices</h3>
               <p className="text-muted-foreground">For scaling and independent deployments</p>
               <ul className="space-y-3">
                 {['Independent scaling', 'Service isolation', 'Tech flexibility', 'Team autonomy'].map((item) => (
@@ -261,13 +373,18 @@ export default function Home() {
                   </li>
                 ))}
               </ul>
-              <div className="pt-2 space-y-1 text-xs text-muted-foreground border-t border-accent/20 pt-4">
+              <div className="pt-4 text-xs text-muted-foreground border-t border-accent/20">
                 <p>Includes Docker & PM2 for deployment</p>
               </div>
-            </div>
+              <div className="text-xs text-accent group-hover:text-cyan-300 transition">
+                Click to see complete workflow →
+              </div>
+            </button>
           </div>
         </div>
       </section>
+
+      {selectedPath && <WorkflowModal path={selectedPath} onClose={() => setSelectedPath(null)} />}
 
       {/* Tech Stack */}
       <section className="py-24 px-4">
@@ -290,8 +407,9 @@ export default function Home() {
             ].map((tech) => (
               <div
                 key={tech}
-                className="flex items-center justify-center p-4 bg-card/50 rounded-lg border border-border hover:border-accent/50 transition-all duration-300 animate-fade-in-up hover:shadow-md hover:shadow-accent/10"
-                style={{ animationDelay: `${Math.random() * 0.3}s`, animationFillMode: 'both' }}
+                className="flex items-center justify-center p-4 bg-card/50 rounded-lg border border-border hover:border-accent/50 transition-all duration-300 opacity-0 hover:shadow-md hover:shadow-accent/10"
+                data-scroll
+                style={{ animationDelay: `${Math.random() * 0.3}s` }}
               >
                 <span className="font-semibold text-sm text-center">{tech}</span>
               </div>
