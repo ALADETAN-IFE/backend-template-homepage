@@ -31,7 +31,21 @@ const useScrollAnimation = () => {
       }
     })
 
-    return () => observer.disconnect()
+    // Fallback: ensure nothing stays hidden if observer misses (e.g., reload + no scroll)
+    const fallback = window.setTimeout(() => {
+      elements.forEach((el) => {
+        if (el.classList.contains('opacity-0')) {
+          el.classList.add('animate-fade-in-up')
+          el.classList.remove('opacity-0')
+          observer.unobserve(el)
+        }
+      })
+    }, 800)
+
+    return () => {
+      window.clearTimeout(fallback)
+      observer.disconnect()
+    }
   }, [])
 }
 
@@ -166,9 +180,28 @@ export default function Home() {
 
   useScrollAnimation()
 
-  // Always start at the top on load/reload
+  // Prefer staying at top on reload, but do not fight the user if they scroll during load
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'auto' })
+    type ScrollRestorationType = 'auto' | 'manual'
+    let restored: ScrollRestorationType | undefined
+    if ('scrollRestoration' in window.history) {
+      restored = window.history.scrollRestoration
+      window.history.scrollRestoration = 'manual'
+    }
+
+    // Only auto-scroll if we are already near the top (user hasn’t started scrolling)
+    const raf = window.requestAnimationFrame(() => {
+      if (window.scrollY <= 8) {
+        window.scrollTo({ top: 0, behavior: 'auto' })
+      }
+    })
+
+    return () => {
+      window.cancelAnimationFrame(raf)
+      if (restored !== undefined) {
+        window.history.scrollRestoration = restored
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -242,6 +275,53 @@ export default function Home() {
     handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Hide nav shortly after load, then show it again when important sections enter view
+  useEffect(() => {
+    const nav = document.querySelector('nav') as HTMLElement | null
+    if (!nav) return
+
+    const sectionIds = ['features', 'cli-workflow', 'docs', 'examples', 'faq', 'support']
+
+    // Hide after a brief delay so the nav is visible on first paint
+    const hideTimeout = window.setTimeout(() => {
+      nav.classList.add('nav-hidden')
+    }, 1200)
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        let anyVisible = false
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) anyVisible = true
+        })
+        if (anyVisible) nav.classList.remove('nav-hidden')
+        else nav.classList.add('nav-hidden')
+      },
+      { threshold: 0.1 }
+    )
+
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id)
+      if (el) observer.observe(el)
+    })
+
+    // Immediate check in case the user reloaded already scrolled into a section
+    for (const id of sectionIds) {
+      const el = document.getElementById(id)
+      if (!el) continue
+      const rect = el.getBoundingClientRect()
+      const viewportMarker = window.innerHeight * 0.25
+      if (rect.top <= viewportMarker && rect.bottom >= viewportMarker) {
+        nav.classList.remove('nav-hidden')
+        break
+      }
+    }
+
+    return () => {
+      window.clearTimeout(hideTimeout)
+      observer.disconnect()
+    }
   }, [])
 
   return (

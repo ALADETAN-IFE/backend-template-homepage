@@ -206,4 +206,16 @@
   .animate-spin-once {
     animation: spinOnce360 0.55s ease-in-out both;
   }
+
+  /* Navigation hide/show helpers */
+  nav {
+    transition: transform 0.32s cubic-bezier(.2,.9,.2,1), opacity 0.32s ease;
+    will-change: transform, opacity;
+  }
+
+  .nav-hidden {
+    transform: translateY(-120%);
+    opacity: 0;
+    pointer-events: none;
+  }
 }
