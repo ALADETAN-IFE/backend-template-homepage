@@ -277,50 +277,46 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Hide nav shortly after load, then show it again when important sections enter view
+  // Stabilized header: hide on scroll down, show on scroll up or near top
   useEffect(() => {
     const nav = document.querySelector('nav') as HTMLElement | null
     if (!nav) return
 
-    const sectionIds = ['features', 'cli-workflow', 'docs', 'examples', 'faq', 'support']
+    let lastY = window.scrollY
+    let ticking = false
+    const threshold = 80
 
-    // Hide after a brief delay so the nav is visible on first paint
-    const hideTimeout = window.setTimeout(() => {
-      nav.classList.add('nav-hidden')
-    }, 1200)
+    const onScroll = () => {
+      if (ticking) return
+      ticking = true
+      requestAnimationFrame(() => {
+        const y = window.scrollY
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        let anyVisible = false
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) anyVisible = true
-        })
-        if (anyVisible) nav.classList.remove('nav-hidden')
-        else nav.classList.add('nav-hidden')
-      },
-      { threshold: 0.1 }
-    )
+        if (y <= 8) {
+          nav.classList.remove('nav-hidden')
+        } else if (y - lastY > 0 && y > threshold) {
+          // scrolling down
+          nav.classList.add('nav-hidden')
+        } else if (lastY - y > 0) {
+          // scrolling up
+          nav.classList.remove('nav-hidden')
+        }
 
-    sectionIds.forEach((id) => {
-      const el = document.getElementById(id)
-      if (el) observer.observe(el)
-    })
-
-    // Immediate check in case the user reloaded already scrolled into a section
-    for (const id of sectionIds) {
-      const el = document.getElementById(id)
-      if (!el) continue
-      const rect = el.getBoundingClientRect()
-      const viewportMarker = window.innerHeight * 0.25
-      if (rect.top <= viewportMarker && rect.bottom >= viewportMarker) {
-        nav.classList.remove('nav-hidden')
-        break
-      }
+        lastY = y
+        ticking = false
+      })
     }
 
+    // Ensure nav visible initially, then hide after a short delay if appropriate
+    nav.classList.remove('nav-hidden')
+    const hideTimeout = window.setTimeout(() => {
+      if (window.scrollY > threshold) nav.classList.add('nav-hidden')
+    }, 1200)
+
+    window.addEventListener('scroll', onScroll, { passive: true })
     return () => {
       window.clearTimeout(hideTimeout)
-      observer.disconnect()
+      window.removeEventListener('scroll', onScroll)
     }
   }, [])
 
