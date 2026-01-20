@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 
 const useScrollAnimation = () => {
   useEffect(() => {
@@ -9,14 +9,25 @@ const useScrollAnimation = () => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('animate-fade-in-up')
+            entry.target.classList.remove('opacity-0')
+            observer.unobserve(entry.target)
           }
         })
       },
       { threshold: 0.1 }
     )
 
-    document.querySelectorAll('[data-scroll]').forEach((el) => {
+    const elements = Array.from(document.querySelectorAll('[data-scroll]'))
+
+    elements.forEach((el) => {
       observer.observe(el)
+      const rect = el.getBoundingClientRect()
+      const alreadyVisible = rect.top < window.innerHeight * 0.9 && rect.bottom > 0
+      if (alreadyVisible) {
+        el.classList.add('animate-fade-in-up')
+        el.classList.remove('opacity-0')
+        observer.unobserve(el)
+      }
     })
 
     return () => observer.disconnect()
@@ -32,12 +43,6 @@ const IconArrow = () => (
 const IconCode = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-  </svg>
-)
-
-const IconDatabase = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
   </svg>
 )
 
@@ -76,26 +81,27 @@ const WorkflowModal = ({ path, onClose }: { path: 'monolith' | 'microservices'; 
     monolith: {
       title: 'Monolith Workflow',
       prompts: [
-        { q: 'Project name?', a: 'my-api' },
-        { q: 'TypeScript or JavaScript?', a: 'TypeScript' },
-        { q: 'Database?', a: 'PostgreSQL' },
-        { q: 'Authentication?', a: 'JWT' },
-        { q: 'Include testing?', a: 'Jest' },
-        { q: 'Add documentation?', a: 'Swagger' },
-      ]
+        { q: 'Project name', a: 'Defaults to "my-backend" (from args if provided)' },
+        { q: 'Language', a: 'TypeScript (default) or JavaScript templates' },
+        { q: 'Description / author / keywords', a: 'Optional; written to package.json + README' },
+        { q: 'Features', a: 'Multiselect: CORS, Rate Limit, Helmet, Morgan' },
+        { q: 'Authentication?', a: 'Toggle JWT + MongoDB on/off' },
+        { q: 'Password hasher (if auth)', a: 'bcrypt on Windows by default, argon2 elsewhere' },
+      ],
+      result: 'Single Express app with only the middleware and auth you selected.'
     },
     microservices: {
       title: 'Microservices Workflow',
       prompts: [
-        { q: 'Service name?', a: 'user-service' },
-        { q: 'TypeScript or JavaScript?', a: 'TypeScript' },
-        { q: 'Database?', a: 'PostgreSQL' },
-        { q: 'Authentication?', a: 'JWT' },
-        { q: 'Include Docker?', a: 'Yes' },
-        { q: 'Service mesh?', a: 'PM2' },
-        { q: 'Include testing?', a: 'Jest' },
-        { q: 'Add documentation?', a: 'Swagger' },
-      ]
+        { q: 'Workspace name', a: 'From args (mono/micro) or prompt if new' },
+        { q: 'Language', a: 'TypeScript (default) or JavaScript templates' },
+        { q: 'Mode', a: 'Docker (compose + Dockerfiles) or PM2 (no Docker)' },
+        { q: 'Features', a: 'Multiselect: CORS, Rate Limit, Helmet, Morgan' },
+        { q: 'Authentication?', a: 'Toggle JWT + MongoDB on/off' },
+        { q: 'Password hasher (if auth)', a: 'bcrypt on Windows by default, argon2 elsewhere' },
+        { q: 'Adding a service in an existing workspace?', a: 'CLI detects /services → ask for service name + per-service features + auth toggle + hasher' },
+      ],
+      result: 'Gateway + health (+ auth if enabled) with Docker or PM2, plus shared utils. Add services later by rerunning the CLI.'
     }
   }
 
@@ -115,7 +121,7 @@ const WorkflowModal = ({ path, onClose }: { path: 'monolith' | 'microservices'; 
         </div>
 
         <div className="space-y-4">
-          <p className="text-muted-foreground">Complete CLI workflow with all prompts:</p>
+          <p className="text-muted-foreground">CLI prompts you’ll see:</p>
           <div className="space-y-3">
             {workflow.prompts.map((item, idx) => (
               <div key={idx} className="bg-secondary/50 border border-border rounded-lg p-4 space-y-2">
@@ -133,7 +139,7 @@ const WorkflowModal = ({ path, onClose }: { path: 'monolith' | 'microservices'; 
 
         <div className="bg-accent/10 border border-accent/30 rounded-lg p-4 space-y-2">
           <p className="text-sm font-semibold">Result:</p>
-          <p className="text-sm text-muted-foreground">Production-ready {path} backend with all selected features, ready to deploy.</p>
+          <p className="text-sm text-muted-foreground">{workflow.result}</p>
         </div>
 
         <button
@@ -167,7 +173,12 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 opacity-40">
+        <div className="absolute -top-20 -left-10 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
+        <div className="absolute top-1/3 -right-10 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
+        <div className="absolute bottom-10 left-1/3 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
+      </div>
       {/* Navigation */}
       <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md z-50 border-b border-border/50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -181,8 +192,8 @@ export default function Home() {
             <button onClick={() => scrollToSection('features')} className="text-sm text-muted-foreground hover:text-foreground transition">
               Features
             </button>
-            <button onClick={() => scrollToSection('how-it-works')} className="text-sm text-muted-foreground hover:text-foreground transition">
-              How It Works
+            <button onClick={() => scrollToSection('cli-workflow')} className="text-sm text-muted-foreground hover:text-foreground transition">
+              CLI Workflow
             </button>
             <a
               href="https://github.com/ALADETAN-IFE/backend-template"
@@ -276,12 +287,12 @@ export default function Home() {
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-20 text-pretty">Built for Developers</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { icon: IconCode, title: 'Language Choice', desc: 'TypeScript or JavaScript' },
-              { icon: IconDatabase, title: 'Database Ready', desc: 'PostgreSQL, MongoDB pre-configured' },
-              { icon: IconShield, title: 'Authentication', desc: 'JWT & session-based auth included' },
-              { icon: IconZap, title: 'Zero Config', desc: 'Interactive CLI for instant setup' },
-              { icon: IconGit, title: 'Best Practices', desc: 'Logging, error handling, testing' },
-              { icon: IconCode, title: 'Deployment Ready', desc: 'Docker for microservices' },
+              { icon: IconCode, title: 'Language Choice', desc: 'TypeScript (default) or JavaScript templates' },
+              { icon: IconShield, title: 'Authentication (optional)', desc: 'JWT + MongoDB when enabled; off means no DB wiring' },
+              { icon: IconZap, title: 'Zero Config CLI', desc: 'Args support mono/micro; prompts only what is needed' },
+              { icon: IconGit, title: 'Microservices Ready', desc: 'Gateway + health; Docker or PM2' },
+              { icon: IconCode, title: 'Middleware Picks', desc: 'CORS, Helmet, Rate Limit, Morgan' },
+              { icon: IconGit, title: 'Add Services Later', desc: 'Re-run CLI; gateway/routes update automatically' },
             ].map((feature, idx) => {
               const Icon = feature.icon
               return (
@@ -303,28 +314,134 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How It Works */}
-      <section id="how-it-works" className="py-24 px-4">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-20 text-pretty">3-Minute Setup</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { step: '1', title: 'Run CLI', desc: 'Execute one command in your terminal' },
-              { step: '2', title: 'Answer Questions', desc: 'Choose language, architecture, features' },
-              { step: '3', title: 'Start Coding', desc: 'Get a production-ready project instantly' },
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                className="space-y-4 text-center animate-fade-in-up"
-                style={{ animationDelay: `${0.15 * idx}s`, animationFillMode: 'both' }}
-              >
-                <div className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-accent to-cyan-400 text-primary rounded-full font-bold text-lg shadow-lg shadow-accent/30">
-                  {item.step}
+      {/* CLI Workflow Deep-Dive */}
+      <section id="cli-workflow" className="py-24 px-4 bg-card/30 border-t border-border/50">
+        <div className="max-w-6xl mx-auto space-y-14">
+          <div className="text-center space-y-4">
+            <p className="inline-flex items-center gap-2 text-lg uppercase tracking-[0.3em] text-accent animate-fade-in">
+              How the Backend Template CLI Works
+            </p>
+            <h2 className="text-4xl md:text-5xl font-bold text-pretty">Guided, production-ready scaffolding</h2>
+            <p className="text-muted-foreground max-w-3xl mx-auto">
+              The CLI asks only what it needs, generates just what you chose, and keeps docs in sync with your answers—no bloat, no mismatched commands.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-[1.1fr,0.9fr] gap-10 items-start">
+            <div className="space-y-6">
+              <div className="bg-card/60 border border-border rounded-xl p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold">1) Start the CLI</h3>
+                  <span className="text-xs text-muted-foreground">Zero-config</span>
                 </div>
-                <h3 className="text-xl font-semibold">{item.title}</h3>
-                <p className="text-muted-foreground">{item.desc}</p>
+                <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-sm text-accent">
+                  <p>npx @ifecodes/backend-template my-project</p>
+                  <p className="text-muted-foreground mt-2">Optional shortcuts:</p>
+                  <p>npx @ifecodes/backend-template my-project mono</p>
+                  <p>npx @ifecodes/backend-template my-project micro</p>
+                </div>
               </div>
-            ))}
+
+              <div className="bg-card/60 border border-border rounded-xl p-6 space-y-4">
+                <h3 className="text-xl font-semibold">2) Interactive workflow</h3>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {[
+                    { title: 'Project name', desc: 'From args or prompt; skipped when adding a service inside /services' },
+                    { title: 'Language', desc: 'TypeScript (default) or JavaScript templates' },
+                    { title: 'Metadata (optional)', desc: 'Description, author, keywords → package.json & README' },
+                    { title: 'Architecture', desc: 'Monolith or Microservice (or inferred from args like mono/micro)' },
+                    { title: 'Mode (micro only)', desc: 'Docker (compose + Dockerfiles) or PM2 (no Docker)' },
+                    { title: 'Features', desc: 'CORS, Rate Limit, Helmet, Morgan (multiselect)' },
+                    { title: 'Authentication', desc: 'Toggle JWT + MongoDB; hasher prompt follows (bcrypt/argon2)' },
+                    { title: 'Adding a service?', desc: 'If /services exists, prompts for service name + per-service features + auth + hasher' },
+                  ].map((item, idx) => (
+                    <div
+                      key={item.title}
+                      className="p-4 rounded-lg border border-border/70 bg-secondary/40 opacity-0"
+                      data-scroll
+                      style={{ animationDelay: `${0.06 * idx}s` }}
+                    >
+                      <p className="text-sm font-semibold">{item.title}</p>
+                      <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-card/60 border border-border rounded-xl p-6 space-y-6">
+                <h3 className="text-xl font-semibold">3) Architecture-specific behavior</h3>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-lg border border-accent/30 bg-accent/5">
+                    <p className="font-semibold">Monolith</p>
+                    <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
+                      <li>• Single Express app with versioned modules</li>
+                      <li>• Optional auth & middleware</li>
+                      <li>• Ready-to-run project</li>
+                    </ul>
+                  </div>
+                  <div className="p-4 rounded-lg border border-accent/30 bg-accent/5">
+                    <p className="font-semibold">Microservice</p>
+                    <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
+                      <li>• API Gateway + services + shared utils</li>
+                      <li>• Choose Docker (compose) or PM2</li>
+                      <li>• Health service always included; optional auth service</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-lg border border-border bg-secondary/40">
+                    <p className="font-semibold">Authentication (optional)</p>
+                    <p className="text-sm text-muted-foreground mt-1">No auth → no DB wiring, no JWT logic, cleaner output.</p>
+                    <p className="text-sm text-muted-foreground mt-1">Auth on → JWT auth, MongoDB wiring, auth routes/controllers.</p>
+                    <p className="text-sm text-muted-foreground mt-2">Hasher choice: bcrypt (Windows-friendly) or argon2 (macOS/Linux recommended). Only one is installed.</p>
+                  </div>
+                  <div className="p-4 rounded-lg border border-border bg-secondary/40">
+                    <p className="font-semibold">Features (pick any)</p>
+                    <p className="text-sm text-muted-foreground mt-1">CORS • Helmet • Rate Limiter • Morgan logging</p>
+                    <p className="text-sm text-muted-foreground mt-1">Only selected middleware and dependencies are added.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-card/60 border border-border rounded-xl p-6 space-y-4">
+                <h3 className="text-xl font-semibold">4) Dynamic outputs</h3>
+                <ul className="space-y-2 text-sm text-muted-foreground leading-relaxed">
+                  <li>• README is generated to match language, architecture, auth, and deploy mode.</li>
+                  <li>• JS projects contain no TS files or configs; TS projects include `tsconfig` and typed files.</li>
+                  <li>• Docker mode adds `docker-compose.yml` and per-service Dockerfiles; PM2 mode adds `pm2.config.js`.</li>
+                  <li>• Re-running in a microservice workspace switches to “add service” mode and wires the gateway automatically.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-gradient-to-br from-accent/15 via-cyan-400/10 to-transparent border border-accent/40 rounded-xl p-6 shadow-lg shadow-accent/10">
+                <h3 className="text-lg font-semibold mb-3">Summary Matrix</h3>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  {[
+                    { k: 'JavaScript', v: 'Pure JS output, no TS configs' },
+                    { k: 'TypeScript', v: 'Full typings + tooling' },
+                    { k: 'Monolith', v: 'Single Express app' },
+                    { k: 'Microservice', v: 'Gateway + services' },
+                    { k: 'Auth OFF', v: 'No DB, no JWT' },
+                    { k: 'Auth ON', v: 'JWT + MongoDB' },
+                    { k: 'bcrypt', v: 'Windows-friendly hashing' },
+                    { k: 'argon2', v: 'Stronger hashing' },
+                    { k: 'Docker', v: 'Containerized services' },
+                    { k: 'PM2', v: 'Process-managed deploy' },
+                    { k: 'No features', v: 'Minimal API' },
+                    { k: 'Any features', v: 'Only chosen middleware' },
+                  ].map((row, idx) => (
+                    <div key={row.k} className="bg-card/70 border border-border rounded-lg p-3 opacity-0" data-scroll style={{ animationDelay: `${0.04 * idx}s` }}>
+                      <p className="font-semibold">{row.k}</p>
+                      <p className="text-muted-foreground text-xs mt-1 leading-snug">{row.v}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
       </section>
@@ -352,7 +469,7 @@ export default function Home() {
                 ))}
               </ul>
               <div className="pt-4 text-xs text-accent group-hover:text-cyan-300 transition">
-                Click to see complete workflow →
+                View CLI prompts for this path →
               </div>
             </button>
 
@@ -377,7 +494,7 @@ export default function Home() {
                 <p>Includes Docker & PM2 for deployment</p>
               </div>
               <div className="text-xs text-accent group-hover:text-cyan-300 transition">
-                Click to see complete workflow →
+                View CLI prompts for this path →
               </div>
             </button>
           </div>
@@ -395,37 +512,25 @@ export default function Home() {
               'Node.js',
               'Express.js',
               'TypeScript',
-              'PostgreSQL',
+              'JavaScript',
               'MongoDB',
-              'Jest',
-              'Swagger',
               'JWT',
-              'Redis',
-              'Git Hooks',
+              'Docker (microservices)',
+              'PM2 (microservices)',
               'Helmet',
               'CORS',
-            ].map((tech) => (
+              'Rate Limiting',
+              'Morgan',
+            ].map((tech, idx) => (
               <div
                 key={tech}
                 className="flex items-center justify-center p-4 bg-card/50 rounded-lg border border-border hover:border-accent/50 transition-all duration-300 opacity-0 hover:shadow-md hover:shadow-accent/10"
                 data-scroll
-                style={{ animationDelay: `${Math.random() * 0.3}s` }}
+                style={{ animationDelay: `${0.05 * idx}s` }}
               >
                 <span className="font-semibold text-sm text-center">{tech}</span>
               </div>
             ))}
-            <div
-              className="flex items-center justify-center p-4 bg-accent/10 rounded-lg border border-accent/50 transition-all duration-300 animate-fade-in-up"
-              style={{ animationDelay: '0.3s', animationFillMode: 'both' }}
-            >
-              <span className="font-semibold text-sm text-accent">Docker (Microservices)</span>
-            </div>
-            <div
-              className="flex items-center justify-center p-4 bg-accent/10 rounded-lg border border-accent/50 transition-all duration-300 animate-fade-in-up"
-              style={{ animationDelay: '0.35s', animationFillMode: 'both' }}
-            >
-              <span className="font-semibold text-sm text-accent">PM2 (Microservices)</span>
-            </div>
           </div>
         </div>
       </section>

@@ -10,23 +10,12 @@ const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 export const metadata: Metadata = {
   title: 'Backend Template Generator | Production-Ready Express API Scaffolding',
   description: 'Generate production-ready Node.js backend APIs with Express.js. Support for TypeScript, JavaScript, monolith and microservices, Docker, PM2, authentication, and security features.',
-  generator: 'v0.app',
   icons: {
     icon: [
       {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
+        url: 'https://res.cloudinary.com/dserpv6p5/image/upload/v1751683818/logo_xvh2e3.png',
       },
     ],
-    apple: '/apple-icon.png',
   },
 }
 

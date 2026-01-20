@@ -14,7 +14,7 @@ Any changes you make to your deployed app will be automatically pushed to this r
 
 Your project is live at:
 
-**[https://vercel.com/aladetanifes-projects/v0-backend-template-generator](https://vercel.com/aladetanifes-projects/v0-backend-template-generator)**
+**[backend-template-generator](https://backend-template.vercel.app)**
 
 ## Build your app
 
