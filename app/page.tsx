@@ -166,6 +166,11 @@ export default function Home() {
 
   useScrollAnimation()
 
+  // Always start at the top on load/reload
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  }, [])
+
   useEffect(() => {
     let cancelled = false
 
