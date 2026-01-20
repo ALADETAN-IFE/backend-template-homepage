@@ -14,7 +14,8 @@ export const metadata: Metadata = {
     icon: [
       {
         // url: 'https://res.cloudinary.com/dserpv6p5/image/upload/v1751683818/logo_xvh2e3.png',
-        url: 'https://res.cloudinary.com/dserpv6p5/image/upload/v1768894350/pa30oql4puxb7soelamn.jpg',
+        // url: 'https://res.cloudinary.com/dserpv6p5/image/upload/v1768894350/pa30oql4puxb7soelamn.jpg',
+        url: 'https://res.cloudinary.com/dserpv6p5/image/upload/v1768904987/ta86tuh6s5wledi2hkkg.png',
       },
     ],
   },
