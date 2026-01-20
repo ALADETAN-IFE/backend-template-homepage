@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 
 const useScrollAnimation = () => {
   useEffect(() => {
@@ -796,15 +797,13 @@ export default function Home() {
               <p className="font-semibold">Open an Issue</p>
               <p className="text-sm text-muted-foreground mt-2">Bug reports and feature requests.</p>
             </a>
-            <a
-              href="https://github.com/ALADETAN-IFE/backend-template/discussions"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              href="/discussions"
               className="p-6 rounded-xl border border-border bg-card/60 hover:border-accent/50 transition-all duration-300"
             >
               <p className="font-semibold">Start a Discussion</p>
               <p className="text-sm text-muted-foreground mt-2">Questions, ideas, and community help.</p>
-            </a>
+            </Link>
             <div className="p-6 rounded-xl border border-border bg-card/60">
               <p className="font-semibold">Email</p>
               <p className="text-sm text-muted-foreground mt-2">
