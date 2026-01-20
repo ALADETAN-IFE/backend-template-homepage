@@ -156,8 +156,34 @@ const WorkflowModal = ({ path, onClose }: { path: 'monolith' | 'microservices'; 
 export default function Home() {
   const [copied, setCopied] = useState(false)
   const [selectedPath, setSelectedPath] = useState<'monolith' | 'microservices' | null>(null)
+  const [npmDownloadsLastMonth, setNpmDownloadsLastMonth] = useState<number | null>(null)
 
   useScrollAnimation()
+
+  useEffect(() => {
+    let cancelled = false
+
+    const loadDownloads = async () => {
+      try {
+        const res = await fetch('https://api.npmjs.org/downloads/point/last-month/@ifecodes/backend-template', {
+          cache: 'no-store',
+        })
+        if (!res.ok) return
+        const data: unknown = await res.json()
+        const downloads = (data as { downloads?: string })?.downloads
+        if (typeof downloads !== 'number' || !Number.isFinite(downloads)) return
+        if (!cancelled) setNpmDownloadsLastMonth(downloads)
+      } catch {
+        // ignore (optional UI)
+      }
+    }
+
+    loadDownloads()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const copyCommand = () => {
     navigator.clipboard.writeText('npx @ifecodes/backend-template@latest my-project')
@@ -256,6 +282,33 @@ export default function Home() {
                   npx @ifecodes/backend-template@latest my-project
                 </pre>
               </button>
+            </div>
+
+            <div className="mt-4 bg-card/30 backdrop-blur rounded-lg border border-border/50 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-left">NPM Package</p>
+                <p className="text-xs text-muted-foreground">
+                  {npmDownloadsLastMonth === null ? (
+                    'Last 30 days downloads: loading…'
+                  ) : (
+                    <>
+                      Last 30 days downloads:{' '}
+                      <span className="text-foreground font-semibold">
+                        {new Intl.NumberFormat().format(npmDownloadsLastMonth)}
+                      </span>
+                    </>
+                  )}
+                </p>
+              </div>
+              <a
+                href="https://www.npmjs.com/package/@ifecodes/backend-template"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground border border-border hover:border-accent/50 hover:bg-muted transition-all duration-200"
+              >
+                View on npm
+                <IconArrow />
+              </a>
             </div>
           </div>
         </div>
