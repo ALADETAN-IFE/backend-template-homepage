@@ -160,6 +160,9 @@ export default function Home() {
   const [selectedPath, setSelectedPath] = useState<'monolith' | 'microservices' | null>(null)
   const [npmDownloadsLastMonth, setNpmDownloadsLastMonth] = useState<number | null>(null)
   const [activeSection, setActiveSection] = useState<string | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [burgerSpinning, setBurgerSpinning] = useState(false)
+  const [burgerSpinKey, setBurgerSpinKey] = useState(0)
 
   useScrollAnimation()
 
@@ -201,6 +204,18 @@ export default function Home() {
     }
   }
 
+  const toggleMobileMenu = () => {
+    setBurgerSpinning(true)
+    setBurgerSpinKey((k) => k + 1) // force reflow so animation restarts every click
+    window.setTimeout(() => setBurgerSpinning(false), 600)
+    setMobileMenuOpen((v) => !v)
+  }
+
+  const goToSectionFromMenu = (id: string) => {
+    setMobileMenuOpen(false)
+    scrollToSection(id)
+  }
+
   useEffect(() => {
     const sectionIds = ['features', 'cli-workflow', 'docs', 'examples', 'faq', 'support']
 
@@ -240,7 +255,9 @@ export default function Home() {
             </div>
             <span className="font-semibold text-lg hidden sm:inline">Backend Template</span>
           </div>
-          <div className="flex items-center gap-6">
+
+          {/* Desktop nav */}
+          <div className="hidden sm:flex items-center gap-6">
             <button
               onClick={() => scrollToSection('features')}
               className={`text-sm transition cursor-pointer ${activeSection === 'features' ? 'text-accent' : 'text-muted-foreground hover:text-foreground active:text-accent'}`}
@@ -285,6 +302,81 @@ export default function Home() {
             >
               GitHub
             </a>
+          </div>
+
+          {/* Mobile burger */}
+          <button
+            type="button"
+            onClick={toggleMobileMenu}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
+            className="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg border border-border bg-card/40 hover:bg-card transition active:scale-95"
+          >
+            <span
+              key={burgerSpinKey}
+              className={`inline-flex ${burgerSpinning ? 'animate-spin-once' : ''} cursor-pointer`}
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M4 6h16" />
+                <path d="M4 12h16" />
+                <path d="M4 18h16" />
+              </svg>
+            </span>
+          </button>
+        </div>
+
+        {/* Mobile menu panel */}
+        <div
+          className={`sm:hidden overflow-hidden border-t border-border/50 transition-all duration-300 ${mobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+        >
+          <div className={`px-4 py-4 transition-transform duration-300 ${mobileMenuOpen ? 'translate-y-0' : '-translate-y-2'}`}>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => goToSectionFromMenu('features')}
+                className="text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer"
+              >
+                Features
+              </button>
+              <button
+                onClick={() => goToSectionFromMenu('cli-workflow')}
+                className="text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer"
+              >
+                CLI Workflow
+              </button>
+              <button
+                onClick={() => goToSectionFromMenu('docs')}
+                className="text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer"
+              >
+                Docs
+              </button>
+              <button
+                onClick={() => goToSectionFromMenu('examples')}
+                className="text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer"
+              >
+                Examples
+              </button>
+              <button
+                onClick={() => goToSectionFromMenu('faq')}
+                className="text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer"
+              >
+                FAQ
+              </button>
+              <button
+                onClick={() => goToSectionFromMenu('support')}
+                className="text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer"
+              >
+                Support
+              </button>
+              <a
+                href="https://github.com/ALADETAN-IFE/backend-template"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition inline-flex items-center justify-between"
+              >
+                <span>GitHub</span>
+                <span className="text-muted-foreground">↗</span>
+              </a>
+            </div>
           </div>
         </div>
       </nav>
