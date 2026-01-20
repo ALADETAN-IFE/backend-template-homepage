@@ -434,7 +434,7 @@ export default function Home() {
 
             <div className="mt-4 bg-card/30 backdrop-blur rounded-lg border border-border/50 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="space-y-1">
-                <p className="text-sm font-semibold text-left">NPM Package</p>
+                <p className="text-sm font-semibold text-left">NPX CLI</p>
                 <p className="text-xs text-muted-foreground">
                   {npmDownloadsLastMonth === null ? (
                     'Last 30 days downloads: loading…'
