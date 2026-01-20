@@ -159,6 +159,7 @@ export default function Home() {
   const [copied, setCopied] = useState(false)
   const [selectedPath, setSelectedPath] = useState<'monolith' | 'microservices' | null>(null)
   const [npmDownloadsLastMonth, setNpmDownloadsLastMonth] = useState<number | null>(null)
+  const [activeSection, setActiveSection] = useState<string | null>(null)
 
   useScrollAnimation()
 
@@ -200,6 +201,29 @@ export default function Home() {
     }
   }
 
+  useEffect(() => {
+    const sectionIds = ['features', 'cli-workflow', 'docs', 'examples', 'faq', 'support']
+
+    const handleScroll = () => {
+      let current: string | null = null
+      for (const id of sectionIds) {
+        const el = document.getElementById(id)
+        if (!el) continue
+        const rect = el.getBoundingClientRect()
+        const viewportMarker = window.innerHeight * 0.25
+        if (rect.top <= viewportMarker && rect.bottom >= viewportMarker) {
+          current = id
+          break
+        }
+      }
+      setActiveSection(current)
+    }
+
+    handleScroll()
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 opacity-40">
@@ -217,22 +241,40 @@ export default function Home() {
             <span className="font-semibold text-lg hidden sm:inline">Backend Template</span>
           </div>
           <div className="flex items-center gap-6">
-            <button onClick={() => scrollToSection('features')} className="text-sm text-muted-foreground hover:text-foreground transition">
+            <button
+              onClick={() => scrollToSection('features')}
+              className={`text-sm transition cursor-pointer ${activeSection === 'features' ? 'text-accent' : 'text-muted-foreground hover:text-foreground active:text-accent'}`}
+            >
               Features
             </button>
-            <button onClick={() => scrollToSection('cli-workflow')} className="text-sm text-muted-foreground hover:text-foreground transition">
+            <button
+              onClick={() => scrollToSection('cli-workflow')}
+              className={`text-sm transition cursor-pointer ${activeSection === 'cli-workflow' ? 'text-accent' : 'text-muted-foreground hover:text-foreground active:text-accent'}`}
+            >
               CLI Workflow
             </button>
-            <button onClick={() => scrollToSection('docs')} className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground transition">
+            <button
+              onClick={() => scrollToSection('docs')}
+              className={`hidden sm:inline text-sm transition cursor-pointer ${activeSection === 'docs' ? 'text-accent' : 'text-muted-foreground hover:text-foreground active:text-accent'}`}
+            >
               Docs
             </button>
-            <button onClick={() => scrollToSection('examples')} className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground transition">
+            <button
+              onClick={() => scrollToSection('examples')}
+              className={`hidden sm:inline text-sm transition cursor-pointer ${activeSection === 'examples' ? 'text-accent' : 'text-muted-foreground hover:text-foreground active:text-accent'}`}
+            >
               Examples
             </button>
-            <button onClick={() => scrollToSection('faq')} className="hidden md:inline text-sm text-muted-foreground hover:text-foreground transition">
+            <button
+              onClick={() => scrollToSection('faq')}
+              className={`hidden md:inline text-sm transition cursor-pointer ${activeSection === 'faq' ? 'text-accent' : 'text-muted-foreground hover:text-foreground active:text-accent'}`}
+            >
               FAQ
             </button>
-            <button onClick={() => scrollToSection('support')} className="hidden md:inline text-sm text-muted-foreground hover:text-foreground transition">
+            <button
+              onClick={() => scrollToSection('support')}
+              className={`hidden md:inline text-sm transition cursor-pointer ${activeSection === 'support' ? 'text-accent' : 'text-muted-foreground hover:text-foreground active:text-accent'}`}
+            >
               Support
             </button>
             <a
