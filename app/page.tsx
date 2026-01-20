@@ -154,6 +154,7 @@ const WorkflowModal = ({ path, onClose }: { path: 'monolith' | 'microservices'; 
 }
 
 export default function Home() {
+  const SUPPORT_EMAIL = 'ifecodes01@gmail.com'
   const [copied, setCopied] = useState(false)
   const [selectedPath, setSelectedPath] = useState<'monolith' | 'microservices' | null>(null)
   const [npmDownloadsLastMonth, setNpmDownloadsLastMonth] = useState<number | null>(null)
@@ -220,6 +221,18 @@ export default function Home() {
             </button>
             <button onClick={() => scrollToSection('cli-workflow')} className="text-sm text-muted-foreground hover:text-foreground transition">
               CLI Workflow
+            </button>
+            <button onClick={() => scrollToSection('docs')} className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground transition">
+              Docs
+            </button>
+            <button onClick={() => scrollToSection('examples')} className="hidden sm:inline text-sm text-muted-foreground hover:text-foreground transition">
+              Examples
+            </button>
+            <button onClick={() => scrollToSection('faq')} className="hidden md:inline text-sm text-muted-foreground hover:text-foreground transition">
+              FAQ
+            </button>
+            <button onClick={() => scrollToSection('support')} className="hidden md:inline text-sm text-muted-foreground hover:text-foreground transition">
+              Support
             </button>
             <a
               href="https://github.com/ALADETAN-IFE/backend-template"
@@ -494,6 +507,315 @@ export default function Home() {
                 </div>
               </div>
 
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Docs */}
+      <section id="docs" className="py-24 px-4 border-t border-border/50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center space-y-4 mb-14">
+            <h2 className="text-4xl md:text-5xl font-bold text-pretty">Docs</h2>
+            <p className="text-muted-foreground max-w-3xl mx-auto">
+              Everything you need: install command, options, and usage examples.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8 items-start">
+            <div className="space-y-4">
+              <div className="bg-card/60 border border-border rounded-xl p-6 space-y-3">
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Quick anchors</p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => scrollToSection('docs-install')}
+                    className="px-3 py-1.5 rounded-lg bg-secondary border border-border hover:border-accent/50 hover:bg-muted transition text-sm"
+                  >
+                    Install
+                  </button>
+                  <button
+                    onClick={() => scrollToSection('docs-options')}
+                    className="px-3 py-1.5 rounded-lg bg-secondary border border-border hover:border-accent/50 hover:bg-muted transition text-sm"
+                  >
+                    Options
+                  </button>
+                  <button
+                    onClick={() => scrollToSection('examples')}
+                    className="px-3 py-1.5 rounded-lg bg-secondary border border-border hover:border-accent/50 hover:bg-muted transition text-sm"
+                  >
+                    Examples
+                  </button>
+                </div>
+              </div>
+
+              <div id="docs-install" className="bg-card/60 border border-border rounded-xl p-6 space-y-3">
+                <h3 className="text-xl font-semibold">Install</h3>
+                <p className="text-sm text-muted-foreground">Run it instantly with npx (recommended).</p>
+                <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-sm text-accent overflow-x-auto">
+                  npx @ifecodes/backend-template@latest my-project
+                </div>
+              </div>
+
+              <div id="docs-options" className="bg-card/60 border border-border rounded-xl p-6 space-y-3">
+                <h3 className="text-xl font-semibold">Options</h3>
+                <p className="text-sm text-muted-foreground">
+                  Shortcuts for architecture (the CLI can also infer this from prompts).
+                </p>
+                <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-sm text-accent overflow-x-auto space-y-1">
+                  <p>npx @ifecodes/backend-template my-project mono</p>
+                  <p>npx @ifecodes/backend-template my-project micro</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-gradient-to-br from-accent/15 via-cyan-400/10 to-transparent border border-accent/40 rounded-xl p-6 space-y-4">
+                <h3 className="text-xl font-semibold">Full docs</h3>
+                <p className="text-sm text-muted-foreground">
+                  Read the complete README with all prompts, generated structure, and notes.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <a
+                    href="https://github.com/ALADETAN-IFE/backend-template#readme"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-accent text-primary font-semibold rounded-lg hover:bg-cyan-300 transition-all duration-200 active:scale-95"
+                  >
+                    Read README
+                    <IconArrow />
+                  </a>
+                  <a
+                    href="https://www.npmjs.com/package/@ifecodes/backend-template"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-secondary text-secondary-foreground font-semibold rounded-lg hover:bg-muted transition-all duration-200 border border-border hover:border-accent active:scale-95"
+                  >
+                    npm package
+                    <IconArrow />
+                  </a>
+                </div>
+              </div>
+
+              <div className="bg-card/60 border border-border rounded-xl p-6 space-y-3">
+                <h3 className="text-xl font-semibold">Requirements</h3>
+                <ul className="space-y-2 text-sm text-muted-foreground leading-relaxed">
+                  <li>• Works on Windows, macOS, and Linux.</li>
+                  <li>• MongoDB is only required when Authentication is enabled.</li>
+                  <li>• Docker is only required when you choose Docker mode for microservices.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Examples */}
+      <section id="examples" className="py-24 px-4 bg-card/30 border-t border-border/50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center space-y-4 mb-14">
+            <h2 className="text-4xl md:text-5xl font-bold text-pretty">Examples</h2>
+            <p className="text-muted-foreground max-w-3xl mx-auto">
+              Example layouts produced by the CLI when authentication is disabled (no auth).
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8 items-start">
+            <div className="bg-card/60 border border-border rounded-xl p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold">Microservice (no auth)</h3>
+                <span className="text-xs text-muted-foreground">Workspace</span>
+              </div>
+              <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-xs text-accent overflow-x-auto whitespace-pre">
+{`my-workspace/
+  services/
+    gateway/
+    health-service/
+  shared/
+    config/
+    utils/
+  package.json
+  README.md
+  .env.example`}
+              </div>
+              <div className="text-sm text-muted-foreground space-y-2 leading-relaxed">
+                <p>Notes:</p>
+                <ul className="space-y-1">
+                  <li>• Docker mode adds <span className="font-mono text-foreground">docker-compose.yml</span> at the repo root.</li>
+                  <li>• PM2 (nodocker) adds <span className="font-mono text-foreground">pm2.config.js</span> at the repo root.</li>
+                  <li>• If auth is enabled, <span className="font-mono text-foreground">auth-service/</span> appears under <span className="font-mono text-foreground">services/</span>.</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="space-y-8">
+              <div className="bg-card/60 border border-border rounded-xl p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold">Microservice (Docker mode)</h3>
+                  <span className="text-xs text-muted-foreground">docker-compose</span>
+                </div>
+                <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-xs text-accent overflow-x-auto whitespace-pre">
+{`my-workspace/
+  services/
+    gateway/
+    health-service/
+  shared/
+    config/
+    utils/
+  docker-compose.yml
+  package.json
+  README.md
+  .env.example`}
+                </div>
+              </div>
+
+              <div className="bg-card/60 border border-border rounded-xl p-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold">Microservice (PM2 mode)</h3>
+                  <span className="text-xs text-muted-foreground">nodocker</span>
+                </div>
+                <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-xs text-accent overflow-x-auto whitespace-pre">
+{`my-workspace/
+  services/
+    gateway/
+    health-service/
+  shared/
+    config/
+    utils/
+  pm2.config.js
+  package.json
+  README.md
+  .env.example`}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-8 bg-card/60 border border-border rounded-xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-semibold">Monolith (no auth)</h3>
+              <span className="text-xs text-muted-foreground">Single repo</span>
+            </div>
+            <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-xs text-accent overflow-x-auto whitespace-pre">
+{`my-monolith-app/
+  src/
+    config/
+    middlewares/
+    modules/
+      v1/
+        health/
+    utils/
+    app.ts (or app.js)
+    routes.ts (or routes.js)
+    server.ts (or server.js)
+  package.json
+  README.md
+  .env.example`}
+            </div>
+            <div className="text-sm text-muted-foreground space-y-2 leading-relaxed">
+              <p>Notes:</p>
+              <ul className="space-y-1">
+                <li>• If auth is enabled, the monolith includes <span className="font-mono text-foreground">src/modules/v1/auth/</span> and <span className="font-mono text-foreground">src/models/</span>.</li>
+                <li>• Tooling (ESLint, Prettier, Husky) is configured at the repository root.</li>
+                <li>• The root <span className="font-mono text-foreground">README.md</span> is generated and updated when you add services in microservice mode.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="py-24 px-4 border-t border-border/50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center space-y-4 mb-14">
+            <h2 className="text-4xl md:text-5xl font-bold text-pretty">FAQ</h2>
+            <p className="text-muted-foreground max-w-3xl mx-auto">
+              Common questions about platform support, requirements, and how the generator behaves.
+            </p>
+          </div>
+
+          <div className="max-w-3xl mx-auto space-y-4">
+            {[
+              {
+                q: 'Does it work on Windows?',
+                a: 'Yes. The CLI is designed to work on Windows, macOS, and Linux. For password hashing, bcrypt is the most Windows-friendly default.',
+              },
+              {
+                q: 'What Node.js version do I need?',
+                a: 'Use a modern LTS Node.js version. If you run into any install/runtime issues, update Node first (LTS) before anything else.',
+              },
+              {
+                q: 'Do I need MongoDB?',
+                a: 'Only if you enable Authentication. If auth is OFF, the output stays clean: no DB wiring, no JWT logic, no auth service.',
+              },
+              {
+                q: 'Docker vs PM2 — when should I choose each?',
+                a: 'Docker mode generates compose + Dockerfiles for containerized services. PM2 mode skips Docker and sets up process-managed deployment. Choose based on your deployment environment.',
+              },
+              {
+                q: 'How does “add service” work in microservices?',
+                a: 'When the CLI detects an existing microservice workspace (a /services folder), it switches into add-service mode: it prompts for a new service name and optional features/auth, then updates gateway routing automatically.',
+              },
+              {
+                q: 'Can I generate JavaScript instead of TypeScript?',
+                a: 'Yes. You can pick TypeScript (default) or JavaScript. The output matches your selection (no TS config in JS projects).',
+              },
+              {
+                q: 'What middleware/features can I include?',
+                a: 'You can select middleware like CORS, Helmet, Rate Limiting, and Morgan. Only what you select gets added to dependencies and wired into the app.',
+              },
+            ].map((item) => (
+              <details key={item.q} className="group bg-card/60 border border-border rounded-xl p-5">
+                <summary className="cursor-pointer list-none flex items-center justify-between gap-4">
+                  <span className="font-semibold">{item.q}</span>
+                  <span className="text-muted-foreground group-open:text-accent transition">+</span>
+                </summary>
+                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">{item.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Support */}
+      <section id="support" className="py-24 px-4 bg-card/30 border-t border-border/50">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center space-y-4 mb-14">
+            <h2 className="text-4xl md:text-5xl font-bold text-pretty">Need help?</h2>
+            <p className="text-muted-foreground max-w-3xl mx-auto">
+              Get support, report bugs, or request features.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <a
+              href="https://github.com/ALADETAN-IFE/backend-template/issues"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-6 rounded-xl border border-border bg-card/60 hover:border-accent/50 transition-all duration-300"
+            >
+              <p className="font-semibold">Open an Issue</p>
+              <p className="text-sm text-muted-foreground mt-2">Bug reports and feature requests.</p>
+            </a>
+            <a
+              href="https://github.com/ALADETAN-IFE/backend-template/discussions"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-6 rounded-xl border border-border bg-card/60 hover:border-accent/50 transition-all duration-300"
+            >
+              <p className="font-semibold">Start a Discussion</p>
+              <p className="text-sm text-muted-foreground mt-2">Questions, ideas, and community help.</p>
+            </a>
+            <div className="p-6 rounded-xl border border-border bg-card/60">
+              <p className="font-semibold">Email</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                {SUPPORT_EMAIL ? (
+                  <a className="text-accent hover:underline" href={`mailto:${SUPPORT_EMAIL}`}>
+                    {SUPPORT_EMAIL}
+                  </a>
+                ) : (
+                  'Add your support email in the code (SUPPORT_EMAIL) to enable this link.'
+                )}
+              </p>
             </div>
           </div>
         </div>
