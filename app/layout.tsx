@@ -7,15 +7,18 @@ import './globals.css'
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
+// Optimized icon served by Cloudinary: auto-format, auto quality, scaled for metadata
+const iconUrl = 'https://res.cloudinary.com/dserpv6p5/image/upload/f_auto,q_auto,w_128/v1768904987/ta86tuh6s5wledi2hkkg.png'
+
 export const metadata: Metadata = {
   title: 'Backend Template Generator | Production-Ready Express API Scaffolding',
   description: 'Generate production-ready Node.js backend APIs with Express.js. Support for TypeScript, JavaScript, monolith and microservices, Docker, PM2, authentication, and security features.',
   icons: {
     icon: [
       {
-        // url: 'https://res.cloudinary.com/dserpv6p5/image/upload/v1751683818/logo_xvh2e3.png',
-        // url: 'https://res.cloudinary.com/dserpv6p5/image/upload/v1768894350/pa30oql4puxb7soelamn.jpg',
-        url: 'https://res.cloudinary.com/dserpv6p5/image/upload/v1768904987/ta86tuh6s5wledi2hkkg.png',
+        url: iconUrl,
+        sizes: '128x128',
+        type: 'image/png',
       },
     ],
   },
@@ -28,6 +31,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`dark ${geist.variable} ${geistMono.variable}`}>
+      <head>
+        <link rel="preload" href={iconUrl} as="image" />
+      </head>
       <body className={`font-sans antialiased bg-background text-foreground`}>
         {children}
         <Analytics />
