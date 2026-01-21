@@ -395,8 +395,6 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  /* Header hiding disabled — navigation stays visible at all times */
-
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 opacity-40">
@@ -1035,7 +1033,7 @@ export default function Home() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <a
-                    href="https://github.com/ALADETAN-IFE/backend-template#readme"
+                    href="https://www.npmjs.com/package/@ifecodes/backend-template?activeTab=readme"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-accent text-primary font-semibold rounded-lg hover:bg-cyan-300 transition-all duration-200 active:scale-95"
