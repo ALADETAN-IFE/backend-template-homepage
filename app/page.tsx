@@ -395,48 +395,7 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Stabilized header: hide on scroll down, show on scroll up or near top
-  useEffect(() => {
-    const nav = document.querySelector("nav") as HTMLElement | null;
-    if (!nav) return;
-
-    let lastY = window.scrollY;
-    let ticking = false;
-    const threshold = 80;
-
-    const onScroll = () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const y = window.scrollY;
-
-        if (y <= 8) {
-          nav.classList.remove("nav-hidden");
-        } else if (y - lastY > 0 && y > threshold) {
-          // scrolling down
-          nav.classList.add("nav-hidden");
-        } else if (lastY - y > 0) {
-          // scrolling up
-          nav.classList.remove("nav-hidden");
-        }
-
-        lastY = y;
-        ticking = false;
-      });
-    };
-
-    // Ensure nav visible initially, then hide after a short delay if appropriate
-    nav.classList.remove("nav-hidden");
-    const hideTimeout = window.setTimeout(() => {
-      if (window.scrollY > threshold) nav.classList.add("nav-hidden");
-    }, 1200);
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.clearTimeout(hideTimeout);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, []);
+  /* Header hiding disabled — navigation stays visible at all times */
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
