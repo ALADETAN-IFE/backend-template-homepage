@@ -1498,7 +1498,7 @@ export default function Home() {
               <IconArrow />
             </button>
             <a
-              {/* href="https://github.com/ALADETAN-IFE/backend-template" */}
+              // href="https://github.com/ALADETAN-IFE/backend-template" 
               href="https://github.com/ALADETAN-IFE/backend-template-homepage"
               target="_blank"
               rel="noopener noreferrer"
@@ -1557,7 +1557,7 @@ export default function Home() {
             <p>
               Made with care by{" "}
               <a
-                {/* href="https://github.com/ALADETAN-IFE" */}
+                // href="https://github.com/ALADETAN-IFE"
                 href="https://ifecodes.xyz"
                 target="_blank"
                 rel="noopener noreferrer"
