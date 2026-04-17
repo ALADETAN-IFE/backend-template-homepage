@@ -1498,8 +1498,7 @@ export default function Home() {
               <IconArrow />
             </button>
             <a
-              // href="https://github.com/ALADETAN-IFE/backend-template" 
-              href="https://github.com/ALADETAN-IFE/backend-template-homepage"
+              href="https://github.com/ALADETAN-IFE/backend-template"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-secondary text-secondary-foreground font-semibold rounded-lg hover:bg-muted transition-all duration-200 border border-border hover:border-accent active:scale-95"
@@ -1534,7 +1533,7 @@ export default function Home() {
                     GitHub Profile
                   </a>
                 </li>
-                {/* <li>
+                <li>
                   <a
                     href="https://github.com/ALADETAN-IFE/backend-template"
                     target="_blank"
@@ -1543,7 +1542,7 @@ export default function Home() {
                   >
                     Repository
                   </a>
-                </li> */}
+                </li>
               </ul>
             </div>
             <div>
