@@ -1527,7 +1527,7 @@ export default function Home() {
           >
             <button
               onClick={() => copyCommand()}
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-accent text-primary font-semibold rounded-lg hover:bg-cyan-300 transition-all duration-200 hover:shadow-lg hover:shadow-accent/50 active:scale-95"
+              className="cursor-pointer inline-flex items-center justify-center gap-2 px-8 py-4 bg-accent text-primary font-semibold rounded-lg hover:bg-cyan-300 transition-all duration-200 hover:shadow-lg hover:shadow-accent/50 active:scale-95"
             >
               {copied ? "Copied!" : "Copy Command"}
               <IconArrow />
