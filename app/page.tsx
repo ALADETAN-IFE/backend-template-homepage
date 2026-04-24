@@ -279,6 +279,9 @@ export default function Home() {
   const [npmDownloadsLastMonth, setNpmDownloadsLastMonth] = useState<
     number | null
   >(null);
+  const [npmDownloadsTotal, setNpmDownloadsTotal] = useState<
+    number | null
+  >(null);
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [burgerSpinning, setBurgerSpinning] = useState(false);
@@ -313,7 +316,7 @@ export default function Home() {
   useEffect(() => {
     let cancelled = false;
 
-    const loadDownloads = async () => {
+    const loadMonthlyDownloads = async () => {
       try {
         const res = await fetch(
           "https://api.npmjs.org/downloads/point/last-month/@ifecodes/backend-template",
@@ -332,7 +335,27 @@ export default function Home() {
       }
     };
 
-    loadDownloads();
+    const loadTotalDownloads = async () => {
+      try {
+        const res = await fetch(
+          "https://api.npmjs.org/downloads/point/2026-01-10:2099-12-31/@ifecodes/backend-template",
+          {
+            cache: "no-store",
+          },
+        );
+        if (!res.ok) return;
+        const data: unknown = await res.json();
+        const downloads = (data as { downloads?: string })?.downloads;
+        if (typeof downloads !== "number" || !Number.isFinite(downloads))
+          return;
+        if (!cancelled) setNpmDownloadsTotal(downloads);
+      } catch {
+        // ignore (optional UI)
+      }
+    };
+
+    loadMonthlyDownloads();
+    loadTotalDownloads();
 
     return () => {
       cancelled = true;
@@ -629,6 +652,18 @@ export default function Home() {
                       Last 30 days downloads:{" "}
                       <span className="text-foreground font-semibold">
                         {new Intl.NumberFormat().format(npmDownloadsLastMonth)}
+                      </span>
+                    </>
+                  )}
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {npmDownloadsTotal === null ? (
+                    "Total downloads: loading…"
+                  ) : (
+                    <>
+                      Total downloads:{" "}
+                      <span className="text-foreground font-semibold">
+                        {new Intl.NumberFormat().format(npmDownloadsTotal)}
                       </span>
                     </>
                   )}
