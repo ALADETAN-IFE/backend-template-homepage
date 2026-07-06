@@ -282,7 +282,7 @@ export default function Home() {
 
         {/* Mobile menu */}
         <div
-          className={`md:hidden overflow-hidden border-t border-white/[0.04] transition-all duration-300 ${
+          className={`md:hidden overflow-hidden border-t border-white/4 transition-all duration-300 ${
             mobileMenuOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
           }`}
         >
@@ -342,7 +342,7 @@ export default function Home() {
       {/* ─── Architecture Comparison ─── */}
       <section
         id="getting-started"
-        className="py-24 px-4 border-t border-white/[0.04]"
+        className="py-24 px-4 border-t border-white/4"
       >
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 tracking-tight">
@@ -471,7 +471,7 @@ export default function Home() {
       </section>
 
       {/* ─── Final CTA ─── */}
-      <section className="py-24 px-4 border-t border-white/[0.04]">
+      <section className="py-24 px-4 border-t border-white/4">
         <div className="max-w-3xl mx-auto text-center space-y-10">
           <div className="space-y-4">
             <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
@@ -505,7 +505,7 @@ export default function Home() {
       </section>
 
       {/* ─── Footer ─── */}
-      <footer className="border-t border-white/[0.04] py-16 px-4">
+      <footer className="border-t border-white/4 py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             <div>
@@ -565,7 +565,7 @@ export default function Home() {
               </p>
             </div>
           </div>
-          <div className="border-t border-white/[0.04] pt-8 text-center text-sm text-muted-foreground">
+          <div className="border-t border-white/4 pt-8 text-center text-sm text-muted-foreground">
             <p>
               Made with care by{" "}
               <a
