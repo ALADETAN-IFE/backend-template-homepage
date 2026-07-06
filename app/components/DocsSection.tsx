@@ -74,7 +74,7 @@ export default function DocsSection({ scrollToSection }: DocsSectionProps) {
           {/* Right Column */}
           <div className="space-y-6">
             {/* Full Docs Card */}
-            <div className="p-6 md:p-8 rounded-2xl bg-gradient-to-br from-accent/[0.08] via-purple-500/[0.04] to-transparent border border-accent/20 space-y-5 shadow-lg shadow-accent/5">
+            <div className="p-6 md:p-8 rounded-2xl bg-gradient-to-br from-accent/[0.08] via-blue-500/[0.04] to-transparent border border-accent/20 space-y-5 shadow-lg shadow-accent/5">
               <h3 className="text-xl font-bold tracking-tight">Full Documentation</h3>
               <p className="text-sm text-muted-foreground leading-relaxed font-normal">
                 Read the comprehensive documentation containing detailed descriptions of interactive prompts, generated project structure, database wiring guides, and environment setups.

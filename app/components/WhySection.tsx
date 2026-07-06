@@ -25,7 +25,7 @@ export default function WhySection() {
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 tracking-tight">
           Why Backend Template?
         </h2>
-        <p className="text-muted text-center mb-16 max-w-2xl mx-auto text-lg">
+        <p className="text-muted-foreground text-center mb-16 max-w-2xl mx-auto text-lg">
           Everything you need to ship faster, built the right way from the start.
         </p>
 
@@ -42,7 +42,7 @@ export default function WhySection() {
               <h3 className="text-xl font-semibold mb-3 tracking-tight">
                 {item.title}
               </h3>
-              <p className="text-muted leading-relaxed">{item.desc}</p>
+              <p className="text-muted-foreground leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </div>
