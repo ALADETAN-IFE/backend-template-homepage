@@ -48,7 +48,7 @@ export default function ExamplesSection() {
             <div className="glass rounded-2xl p-6 md:p-8 space-y-4 shadow-lg shadow-black/15">
               <div className="flex items-center justify-between border-b border-white/5 pb-4">
                 <h3 className="text-base font-bold tracking-tight">Microservice Docker Mode</h3>
-                <span className="text-[9px] font-bold uppercase tracking-wider text-purple-400 px-2 py-0.5 rounded-full bg-purple-500/10">Containers</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-blue-400 px-2 py-0.5 rounded-full bg-blue-500/10">Containers</span>
               </div>
               <pre className="bg-black/40 border border-white/5 rounded-xl p-4 font-mono text-xs text-accent overflow-x-auto leading-relaxed">
 {`my-workspace/
