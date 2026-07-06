@@ -106,7 +106,7 @@ export default function FeaturesSection() {
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 tracking-tight">
           Built for Developers
         </h2>
-        <p className="text-muted text-center mb-16 max-w-2xl mx-auto text-lg">
+        <p className="text-muted-foreground text-center mb-16 max-w-2xl mx-auto text-lg">
           Every feature is designed to remove friction and let you focus on what matters.
         </p>
 
@@ -123,7 +123,7 @@ export default function FeaturesSection() {
               <h3 className="text-lg font-semibold mb-2 tracking-tight">
                 {feature.title}
               </h3>
-              <p className="text-muted text-sm leading-relaxed">
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 {feature.desc}
               </p>
             </div>
