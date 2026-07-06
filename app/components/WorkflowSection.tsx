@@ -154,6 +154,10 @@ export default function WorkflowSection() {
                   <span className="text-accent mt-0.5">•</span>
                   <span><strong>Environment variables</strong> are verified at launch to prevent server startups without keys.</span>
                 </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="text-accent mt-0.5">•</span>
+                  <span><strong>Swagger UI /api-docs</strong> is automatically configured and served with auto-generated OpenAPI documentation.</span>
+                </li>
               </ul>
             </div>
           </div>

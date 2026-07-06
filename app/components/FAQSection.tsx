@@ -26,6 +26,10 @@ const faqs = [
     a: "When you run the template command within an existing microservice directory (which contains a /services directory), the CLI skips metadata configuration. Instead, it enters 'add-service' mode, prompts for service-specific options, creates the service directory, and automatically rewires the API Gateway proxy routing mapping.",
   },
   {
+    q: "Does the generator set up API documentation?",
+    a: "Yes. Every generated project automatically integrates Swagger UI to document your API endpoints. Once you start the server, you can view and test your endpoints interactively by visiting /api-docs in your browser.",
+  },
+  {
     q: "Can I generate JavaScript code instead of TypeScript?",
     a: "Yes. Although TypeScript is selected by default, you can toggle language choices to generate clean JavaScript templates. The output will exclude all TS compiler files and typings.",
   },

@@ -453,6 +453,7 @@ export default function Home() {
               "CORS",
               "Rate Limiting",
               "Morgan",
+              "Swagger UI",
             ].map((tech, idx) => (
               <div
                 key={tech}
