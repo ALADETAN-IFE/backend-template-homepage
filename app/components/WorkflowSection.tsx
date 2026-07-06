@@ -164,7 +164,7 @@ export default function WorkflowSection() {
 
           {/* Sticky Sidebar Matrix */}
           <div className="lg:col-span-4 lg:sticky lg:top-24 space-y-6">
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-accent/[0.08] via-purple-500/[0.04] to-transparent border border-accent/20 space-y-4 shadow-lg shadow-accent/5">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-accent/[0.08] via-blue-500/[0.04] to-transparent border border-accent/20 space-y-4 shadow-lg shadow-accent/5">
               <h3 className="text-base font-bold tracking-wider uppercase text-accent/90">Summary Matrix</h3>
               <p className="text-xs text-muted-foreground">
                 All features map to optimized, isolated code paths without global pollution.

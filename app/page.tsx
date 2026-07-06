@@ -205,7 +205,7 @@ export default function Home() {
       {/* ─── Ambient glow blobs ─── */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-accent/[0.07] blur-[120px] animate-float" />
-        <div className="absolute top-1/3 -right-40 h-[500px] w-[500px] rounded-full bg-purple-500/[0.05] blur-[120px] animate-float" style={{ animationDelay: "2s" }} />
+        <div className="absolute top-1/3 -right-40 h-[500px] w-[500px] rounded-full bg-blue-500/[0.04] blur-[120px] animate-float" style={{ animationDelay: "2s" }} />
         <div className="absolute bottom-20 left-1/4 h-[400px] w-[400px] rounded-full bg-accent/[0.04] blur-[120px] animate-float" style={{ animationDelay: "4s" }} />
       </div>
 
@@ -220,7 +220,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-accent to-purple-500 rounded-lg flex items-center justify-center font-bold text-[#09090b] text-sm shadow-lg shadow-accent/20">
+            <div className="w-8 h-8 bg-gradient-to-br from-accent to-blue-500 rounded-lg flex items-center justify-center font-bold text-[#09090b] text-sm shadow-lg shadow-accent/20">
               B
             </div>
             <span className="font-semibold text-lg hidden sm:inline tracking-tight">
@@ -386,7 +386,7 @@ export default function Home() {
             {/* Microservices */}
             <button
               onClick={() => setSelectedPath("microservices")}
-              className="text-left p-8 rounded-2xl space-y-6 transition-all duration-300 group cursor-pointer hover:-translate-y-1 bg-gradient-to-br from-accent/[0.08] to-purple-500/[0.04] border border-accent/20 hover:border-accent/40 backdrop-blur-sm"
+              className="text-left p-8 rounded-2xl space-y-6 transition-all duration-300 group cursor-pointer hover:-translate-y-1 bg-gradient-to-br from-accent/[0.08] to-blue-500/[0.04] border border-accent/20 hover:border-accent/40 backdrop-blur-sm"
             >
               <div>
                 <h3 className="text-2xl font-bold group-hover:text-cyan-300 transition-colors">
@@ -510,7 +510,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             <div>
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-7 h-7 bg-gradient-to-br from-accent to-purple-500 rounded-lg flex items-center justify-center font-bold text-[#09090b] text-xs">
+                <div className="w-7 h-7 bg-gradient-to-br from-accent to-blue-500 rounded-lg flex items-center justify-center font-bold text-[#09090b] text-xs">
                   B
                 </div>
                 <h3 className="font-semibold">Backend Template</h3>
