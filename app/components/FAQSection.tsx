@@ -27,6 +27,10 @@ const FAQSection = () => {
               a: "Only if you enable Authentication. If auth is OFF, the output stays clean: no DB wiring, no JWT logic, no auth service.",
             },
             {
+              q: "Does the generator include request validation?",
+              a: "Yes. You can opt to include request validation using Zod schemas. If enabled, Zod schema files and request validation middlewares are automatically scaffolded and wired into the generated API endpoints (e.g., auth, health).",
+            },
+            {
               q: "Docker vs PM2 — when should I choose each?",
               a: "Docker mode generates compose + Dockerfiles for containerized services. PM2 mode skips Docker and sets up process-managed deployment. Choose based on your deployment environment.",
             },

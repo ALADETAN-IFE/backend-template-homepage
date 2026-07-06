@@ -26,6 +26,14 @@ const WorkflowModal: React.FC<WorkflowModalProps> = ({ path, onClose }) => {
           q: "Password hasher (if auth)",
           a: "bcrypt on Windows by default, argon2 elsewhere",
         },
+        {
+          q: "Project Scope",
+          a: "Team (adds CI/CD, PR template, contributing guide) or Individual",
+        },
+        {
+          q: "Request validation?",
+          a: "Toggle request validation with Zod schemas on/off",
+        },
       ],
       result:
         "Single Express app with only the middleware and auth you selected.",
@@ -41,6 +49,14 @@ const WorkflowModal: React.FC<WorkflowModalProps> = ({ path, onClose }) => {
         {
           q: "Password hasher (if auth)",
           a: "bcrypt on Windows by default, argon2 elsewhere",
+        },
+        {
+          q: "Project Scope",
+          a: "Team (adds CI/CD, PR template, contributing guide) or Individual",
+        },
+        {
+          q: "Request validation?",
+          a: "Toggle request validation with Zod schemas on/off",
         },
         {
           q: "Adding a service in an existing workspace?",

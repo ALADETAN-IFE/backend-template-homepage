@@ -512,6 +512,7 @@ export default function Home() {
               "CORS",
               "Rate Limiting",
               "Morgan",
+              "Zod (Validation)",
             ].map((tech, idx) => (
               <div
                 key={tech}

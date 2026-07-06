@@ -81,6 +81,10 @@ const WorkflowSection = () => {
                     desc: "Toggle JWT + MongoDB; hasher prompt follows (bcrypt/argon2)",
                   },
                   {
+                    title: "Request validation",
+                    desc: "Toggle request validation with Zod schemas to secure input payloads.",
+                  },
+                  {
                     title: "Adding a service?",
                     desc: "If /services exists, prompts for service name + per-service features + auth + hasher",
                   },
