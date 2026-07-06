@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import HeroSection from "./components/HeroSection";
@@ -11,6 +10,8 @@ import DocsSection from "./components/DocsSection";
 import ExamplesSection from "./components/ExamplesSection";
 import FAQSection from "./components/FAQSection";
 import SupportSection from "./components/SupportSection";
+import WorkflowModal from "./components/WorkflowModal";
+import { IconArrow, IconGit, IconCheck } from "./components/Icons";
 
 const useScrollAnimation = () => {
   useEffect(() => {
@@ -37,433 +38,374 @@ const useScrollAnimation = () => {
       if (alreadyVisible) {
         el.classList.add("animate-fade-in-up");
         el.classList.remove("opacity-0");
+        observer.unobserve(el);
+      }
+    });
 
-        return (
-          <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
-            {/* ...existing navigation and background code... */}
+    // Fallback: ensure nothing stays hidden if observer misses (e.g., reload + no scroll)
+    const fallback = window.setTimeout(() => {
+      elements.forEach((el) => {
+        if (el.classList.contains("opacity-0")) {
+          el.classList.add("animate-fade-in-up");
+          el.classList.remove("opacity-0");
+          observer.unobserve(el);
+        }
+      });
+    }, 800);
 
-            {/* Hero Section */}
-            <HeroSection />
+    return () => {
+      window.clearTimeout(fallback);
+      observer.disconnect();
+    };
+  }, []);
+};
 
-            {/* Why Section */}
-            <WhySection />
+export default function Home() {
+  const SUPPORT_EMAIL = "fortuneifealadetan01@gmail.com";
+  const [copied, setCopied] = useState(false);
+  const [selectedPath, setSelectedPath] = useState<
+    "monolith" | "microservices" | null
+  >(null);
+  const [npmDownloadsLastMonth, setNpmDownloadsLastMonth] = useState<
+    number | null
+  >(null);
+  const [npmDownloadsTotal, setNpmDownloadsTotal] = useState<
+    number | null
+  >(null);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [burgerSpinning, setBurgerSpinning] = useState(false);
+  const [burgerSpinKey, setBurgerSpinKey] = useState(0);
 
-            {/* Features Section */}
-            <FeaturesSection />
+  useScrollAnimation();
 
-            {/* Workflow Section */}
-            <WorkflowSection />
+  // Prefer staying at top on reload, but do not fight the user if they scroll during load
+  useEffect(() => {
+    type ScrollRestorationType = "auto" | "manual";
+    let restored: ScrollRestorationType | undefined;
+    if ("scrollRestoration" in window.history) {
+      restored = window.history.scrollRestoration;
+      window.history.scrollRestoration = "manual";
+    }
 
-            {/* Docs Section */}
-            <DocsSection />
+    // Only auto-scroll if we are already near the top (user hasn’t started scrolling)
+    const raf = window.requestAnimationFrame(() => {
+      if (window.scrollY <= 8) {
+        window.scrollTo({ top: 0, behavior: "auto" });
+      }
+    });
 
-            {/* Examples Section */}
-            <ExamplesSection />
+    return () => {
+      window.cancelAnimationFrame(raf);
+      if (restored !== undefined) {
+        window.history.scrollRestoration = restored;
+      }
+    };
+  }, []);
 
-            {/* FAQ Section */}
-            <FAQSection />
+  useEffect(() => {
+    let cancelled = false;
 
-            {/* Support Section */}
-            <SupportSection />
-          </div>
+    const loadMonthlyDownloads = async () => {
+      try {
+        const res = await fetch(
+          "https://api.npmjs.org/downloads/point/last-month/@ifecodes/backend-template",
+          {
+            cache: "no-store",
+          },
         );
-      </section>
+        if (!res.ok) return;
+        const data = await res.json();
+        const downloads = data?.downloads;
+        if (typeof downloads !== "number" || !Number.isFinite(downloads))
+          return;
+        if (!cancelled) setNpmDownloadsLastMonth(downloads);
+      } catch {
+        // ignore (optional UI)
+      }
+    };
 
-      {/* Docs */}
-      <section id="docs" className="py-24 px-4 border-t border-border/50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center space-y-4 mb-14">
-            <h2 className="text-4xl md:text-5xl font-bold text-pretty">Docs</h2>
-            <p className="text-muted-foreground max-w-3xl mx-auto">
-              Everything you need: install command, options, and usage examples.
-            </p>
+    const loadTotalDownloads = async () => {
+      try {
+        const res = await fetch(
+          "https://api.npmjs.org/downloads/point/2026-01-10:2099-12-31/@ifecodes/backend-template",
+          {
+            cache: "no-store",
+          },
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        const downloads = data?.downloads;
+        if (typeof downloads !== "number" || !Number.isFinite(downloads))
+          return;
+        if (!cancelled) setNpmDownloadsTotal(downloads);
+      } catch {
+        // ignore (optional UI)
+      }
+    };
+
+    loadMonthlyDownloads();
+    loadTotalDownloads();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const copyCommand = () => {
+    navigator.clipboard.writeText(
+      "npx @ifecodes/backend-template@latest my-project",
+    );
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const toggleMobileMenu = () => {
+    setBurgerSpinning(true);
+    setBurgerSpinKey((k) => k + 1); // force reflow so animation restarts every click
+    window.setTimeout(() => setBurgerSpinning(false), 600);
+    setMobileMenuOpen((v) => !v);
+  };
+
+  const goToSectionFromMenu = (id: string) => {
+    setMobileMenuOpen(false);
+    scrollToSection(id);
+  };
+
+  useEffect(() => {
+    const sectionIds = [
+      "features",
+      "cli-workflow",
+      "docs",
+      "examples",
+      "faq",
+      "support",
+    ];
+
+    const handleScroll = () => {
+      let current: string | null = null;
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (!el) continue;
+        const rect = el.getBoundingClientRect();
+        const viewportMarker = window.innerHeight * 0.25;
+        if (rect.top <= viewportMarker && rect.bottom >= viewportMarker) {
+          current = id;
+          break;
+        }
+      }
+      setActiveSection(current);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0 opacity-40">
+        <div className="absolute -top-20 -left-10 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
+        <div className="absolute top-1/3 -right-10 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
+        <div className="absolute bottom-10 left-1/3 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
+      </div>
+
+      {/* Navigation */}
+      <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md z-50 border-b border-border/50">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-accent to-accent/60 rounded flex items-center justify-center font-bold text-primary text-sm">
+              B
+            </div>
+            <span className="font-semibold text-lg hidden sm:inline">
+              Backend Template
+            </span>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8 items-start">
-            <div className="space-y-4">
-              <div className="bg-card/60 border border-border rounded-xl p-6 space-y-3">
-                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                  Quick anchors
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => scrollToSection("docs-install")}
-                    className="px-3 py-1.5 rounded-lg bg-secondary border border-border hover:border-accent/50 hover:bg-muted transition text-sm"
-                  >
-                    Install
-                  </button>
-                  <button
-                    onClick={() => scrollToSection("docs-options")}
-                    className="px-3 py-1.5 rounded-lg bg-secondary border border-border hover:border-accent/50 hover:bg-muted transition text-sm"
-                  >
-                    Options
-                  </button>
-                  <button
-                    onClick={() => scrollToSection("examples")}
-                    className="px-3 py-1.5 rounded-lg bg-secondary border border-border hover:border-accent/50 hover:bg-muted transition text-sm"
-                  >
-                    Examples
-                  </button>
-                </div>
-              </div>
-
-              <div
-                id="docs-install"
-                className="bg-card/60 border border-border rounded-xl p-6 space-y-3"
-              >
-                <h3 className="text-xl font-semibold">Install</h3>
-                <p className="text-sm text-muted-foreground">
-                  Run it instantly with npx (recommended).
-                </p>
-                <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-sm text-accent overflow-x-auto">
-                  npx @ifecodes/backend-template@latest my-project
-                </div>
-              </div>
-
-              <div
-                id="docs-options"
-                className="bg-card/60 border border-border rounded-xl p-6 space-y-3"
-              >
-                <h3 className="text-xl font-semibold">Options</h3>
-                <p className="text-sm text-muted-foreground">
-                  Shortcuts for architecture (the CLI can also infer this from
-                  prompts).
-                </p>
-                <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-sm text-accent overflow-x-auto space-y-1">
-                  <p>npx @ifecodes/backend-template my-project mono</p>
-                  <p>npx @ifecodes/backend-template my-project micro</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="bg-linear-to-br from-accent/15 via-cyan-400/10 to-transparent border border-accent/40 rounded-xl p-6 space-y-4">
-                <h3 className="text-xl font-semibold">Full docs</h3>
-                <p className="text-sm text-muted-foreground">
-                  Read the complete README with all prompts, generated
-                  structure, and notes.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <a
-                    href="https://www.npmjs.com/package/@ifecodes/backend-template?activeTab=readme"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-accent text-primary font-semibold rounded-lg hover:bg-cyan-300 transition-all duration-200 active:scale-95"
-                  >
-                    Read README
-                    <IconArrow />
-                  </a>
-                  <a
-                    href="https://www.npmjs.com/package/@ifecodes/backend-template"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-secondary text-secondary-foreground font-semibold rounded-lg hover:bg-muted transition-all duration-200 border border-border hover:border-accent active:scale-95"
-                  >
-                    npm package
-                    <IconArrow />
-                  </a>
-                </div>
-              </div>
-
-              <div className="bg-card/60 border border-border rounded-xl p-6 space-y-3">
-                <h3 className="text-xl font-semibold">Requirements</h3>
-                <ul className="space-y-2 text-sm text-muted-foreground leading-relaxed">
-                  <li>• Works on Windows, macOS, and Linux.</li>
-                  <li>
-                    • MongoDB is only required when Authentication is enabled.
-                  </li>
-                  <li>
-                    • Docker is only required when you choose Docker mode for
-                    microservices.
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Examples */}
-      <section
-        id="examples"
-        className="py-24 px-4 bg-card/30 border-t border-border/50"
-      >
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center space-y-4 mb-14">
-            <h2 className="text-4xl md:text-5xl font-bold text-pretty">
+          {/* Desktop nav */}
+          <div className="hidden sm:flex items-center gap-6">
+            <button
+              onClick={() => scrollToSection("features")}
+              className={`text-sm transition cursor-pointer ${activeSection === "features" ? "text-accent" : "text-muted-foreground hover:text-foreground active:text-accent"}`}
+            >
+              Features
+            </button>
+            <button
+              onClick={() => scrollToSection("cli-workflow")}
+              className={`text-sm transition cursor-pointer ${activeSection === "cli-workflow" ? "text-accent" : "text-muted-foreground hover:text-foreground active:text-accent"}`}
+            >
+              CLI Workflow
+            </button>
+            <button
+              onClick={() => scrollToSection("docs")}
+              className={`hidden sm:inline text-sm transition cursor-pointer ${activeSection === "docs" ? "text-accent" : "text-muted-foreground hover:text-foreground active:text-accent"}`}
+            >
+              Docs
+            </button>
+            <button
+              onClick={() => scrollToSection("examples")}
+              className={`hidden sm:inline text-sm transition cursor-pointer ${activeSection === "examples" ? "text-accent" : "text-muted-foreground hover:text-foreground active:text-accent"}`}
+            >
               Examples
-            </h2>
-            <p className="text-muted-foreground max-w-3xl mx-auto">
-              Example layouts produced by the CLI when authentication is
-              disabled (no auth).
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-2 gap-8 items-start">
-            <div className="bg-card/60 border border-border rounded-xl p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold">
-                  Microservice (no auth)
-                </h3>
-                <span className="text-xs text-muted-foreground">Workspace</span>
-              </div>
-              <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-xs text-accent overflow-x-auto whitespace-pre">
-                {`my-workspace/
-  services/
-    gateway/
-    health-service/
-  shared/
-    config/
-    utils/
-  package.json
-  README.md
-  .env.example`}
-              </div>
-              <div className="text-sm text-muted-foreground space-y-2 leading-relaxed">
-                <p>Notes:</p>
-                <ul className="space-y-1">
-                  <li>
-                    • Docker mode adds{" "}
-                    <span className="font-mono text-foreground">
-                      docker-compose.yml
-                    </span>{" "}
-                    at the repo root.
-                  </li>
-                  <li>
-                    • PM2 (nodocker) adds{" "}
-                    <span className="font-mono text-foreground">
-                      pm2.config.js
-                    </span>{" "}
-                    at the repo root.
-                  </li>
-                  <li>
-                    • If auth is enabled,{" "}
-                    <span className="font-mono text-foreground">
-                      auth-service/
-                    </span>{" "}
-                    appears under{" "}
-                    <span className="font-mono text-foreground">services/</span>
-                    .
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="space-y-8">
-              <div className="bg-card/60 border border-border rounded-xl p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">
-                    Microservice (Docker mode)
-                  </h3>
-                  <span className="text-xs text-muted-foreground">
-                    docker-compose
-                  </span>
-                </div>
-                <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-xs text-accent overflow-x-auto whitespace-pre">
-                  {`my-workspace/
-  services/
-    gateway/
-    health-service/
-  shared/
-    config/
-    utils/
-  docker-compose.yml
-  package.json
-  README.md
-  .env.example`}
-                </div>
-              </div>
-
-              <div className="bg-card/60 border border-border rounded-xl p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-semibold">
-                    Microservice (PM2 mode)
-                  </h3>
-                  <span className="text-xs text-muted-foreground">
-                    nodocker
-                  </span>
-                </div>
-                <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-xs text-accent overflow-x-auto whitespace-pre">
-                  {`my-workspace/
-  services/
-    gateway/
-    health-service/
-  shared/
-    config/
-    utils/
-  pm2.config.js
-  package.json
-  README.md
-  .env.example`}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-8 bg-card/60 border border-border rounded-xl p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold">Monolith (no auth)</h3>
-              <span className="text-xs text-muted-foreground">Single repo</span>
-            </div>
-            <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-xs text-accent overflow-x-auto whitespace-pre">
-              {`my-monolith-app/
-  src/
-    config/
-    middlewares/
-    modules/
-      v1/
-        health/
-    utils/
-    app.ts (or app.js)
-    routes.ts (or routes.js)
-    server.ts (or server.js)
-  package.json
-  README.md
-  .env.example`}
-            </div>
-            <div className="text-sm text-muted-foreground space-y-2 leading-relaxed">
-              <p>Notes:</p>
-              <ul className="space-y-1">
-                <li>
-                  • If auth is enabled, the monolith includes{" "}
-                  <span className="font-mono text-foreground">
-                    src/modules/v1/auth/
-                  </span>{" "}
-                  and{" "}
-                  <span className="font-mono text-foreground">src/models/</span>
-                  .
-                </li>
-                <li>
-                  • Tooling (ESLint, Prettier, Husky) is configured at the
-                  repository root.
-                </li>
-                <li>
-                  • The root{" "}
-                  <span className="font-mono text-foreground">README.md</span>{" "}
-                  is generated and updated when you add services in microservice
-                  mode.
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section id="faq" className="py-24 px-4 border-t border-border/50">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center space-y-4 mb-14">
-            <h2 className="text-4xl md:text-5xl font-bold text-pretty">FAQ</h2>
-            <p className="text-muted-foreground max-w-3xl mx-auto">
-              Common questions about platform support, requirements, and how the
-              generator behaves.
-            </p>
-          </div>
-
-          <div className="max-w-3xl mx-auto space-y-4">
-            {[
-              {
-                q: "Does it work on Windows?",
-                a: "Yes. The CLI is designed to work on Windows, macOS, and Linux. For password hashing, bcrypt is the most Windows-friendly default.",
-              },
-              {
-                q: "What Node.js version do I need?",
-                a: "Use a modern LTS Node.js version. If you run into any install/runtime issues, update Node first (LTS) before anything else.",
-              },
-              {
-                q: "Do I need MongoDB?",
-                a: "Only if you enable Authentication. If auth is OFF, the output stays clean: no DB wiring, no JWT logic, no auth service.",
-              },
-              {
-                q: "Docker vs PM2 — when should I choose each?",
-                a: "Docker mode generates compose + Dockerfiles for containerized services. PM2 mode skips Docker and sets up process-managed deployment. Choose based on your deployment environment.",
-              },
-              {
-                q: "How does “add service” work in microservices?",
-                a: "When the CLI detects an existing microservice workspace (a /services folder), it switches into add-service mode: it prompts for a new service name and optional features/auth, then updates gateway routing automatically.",
-              },
-              {
-                q: "Can I generate JavaScript instead of TypeScript?",
-                a: "Yes. You can pick TypeScript (default) or JavaScript. The output matches your selection (no TS config in JS projects).",
-              },
-              {
-                q: "What middleware/features can I include?",
-                a: "You can select middleware like CORS, Helmet, Rate Limiting, and Morgan. Only what you select gets added to dependencies and wired into the app.",
-              },
-            ].map((item) => (
-              <details
-                key={item.q}
-                className="group bg-card/60 border border-border rounded-xl p-5"
-              >
-                <summary className="cursor-pointer list-none flex items-center justify-between gap-4">
-                  <span className="font-semibold">{item.q}</span>
-                  <span className="text-muted-foreground group-open:text-accent transition">
-                    +
-                  </span>
-                </summary>
-                <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
-                  {item.a}
-                </p>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Support */}
-      <section
-        id="support"
-        className="py-24 px-4 bg-card/30 border-t border-border/50"
-      >
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center space-y-4 mb-14">
-            <h2 className="text-4xl md:text-5xl font-bold text-pretty">
-              Need help?
-            </h2>
-            <p className="text-muted-foreground max-w-3xl mx-auto">
-              Get support, report bugs, or request features.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
+            </button>
+            <button
+              onClick={() => scrollToSection("faq")}
+              className={`hidden md:inline text-sm transition cursor-pointer ${activeSection === "faq" ? "text-accent" : "text-muted-foreground hover:text-foreground active:text-accent"}`}
+            >
+              FAQ
+            </button>
+            <button
+              onClick={() => scrollToSection("support")}
+              className={`hidden md:inline text-sm transition cursor-pointer ${activeSection === "support" ? "text-accent" : "text-muted-foreground hover:text-foreground active:text-accent"}`}
+            >
+              Support
+            </button>
             <a
-              href="https://github.com/ALADETAN-IFE/backend-template/issues"
+              href="https://github.com/ALADETAN-IFE/backend-template"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-6 rounded-xl border border-border bg-card/60 hover:border-accent/50 transition-all duration-300"
+              className="text-sm text-muted-foreground hover:text-accent transition"
             >
-              <p className="font-semibold">Open an Issue</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Bug reports and feature requests.
-              </p>
+              GitHub
             </a>
-            <Link
-              href="/discussions"
-              className="p-6 rounded-xl border border-border bg-card/60 hover:border-accent/50 transition-all duration-300"
+          </div>
+
+          {/* Mobile burger */}
+          <button
+            type="button"
+            onClick={toggleMobileMenu}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+            className="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg border border-border bg-card/40 hover:bg-card transition active:scale-95 cursor-pointer"
+          >
+            <span
+              key={burgerSpinKey}
+              className={`inline-flex ${burgerSpinning ? "animate-spin-once" : ""} cursor-pointer`}
             >
-              <p className="font-semibold">Start a Discussion</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Questions, ideas, and community help.
-              </p>
-            </Link>
-            <div className="p-6 rounded-xl border border-border bg-card/60">
-              <p className="font-semibold">Email</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                {SUPPORT_EMAIL ? (
-                  <a
-                    className="text-accent hover:underline"
-                    href={`mailto:${SUPPORT_EMAIL}`}
-                  >
-                    {SUPPORT_EMAIL}
-                  </a>
-                ) : (
-                  "Add your support email in the code (SUPPORT_EMAIL) to enable this link."
-                )}
-              </p>
+              {mobileMenuOpen ? (
+                <svg
+                  className="w-5 h-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                >
+                  <path d="M6 6l12 12" />
+                  <path d="M18 6l-12 12" />
+                </svg>
+              ) : (
+                <svg
+                  className="w-5 h-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                >
+                  <path d="M4 6h16" />
+                  <path d="M4 12h16" />
+                  <path d="M4 18h16" />
+                </svg>
+              )}
+            </span>
+          </button>
+        </div>
+
+        {/* Mobile menu panel */}
+        <div
+          className={`sm:hidden overflow-hidden border-t border-border/50 transition-all duration-300 ${mobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+        >
+          <div
+            className={`px-4 py-4 transition-transform duration-300 ${mobileMenuOpen ? "translate-y-0" : "-translate-y-2"}`}
+          >
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => goToSectionFromMenu("features")}
+                className={`text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer ${activeSection === "features" ? "text-accent" : "text-muted-foreground"}`}
+              >
+                Features
+              </button>
+              <button
+                onClick={() => goToSectionFromMenu("cli-workflow")}
+                className={`text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer ${activeSection === "cli-workflow" ? "text-accent" : "text-muted-foreground"}`}
+              >
+                CLI Workflow
+              </button>
+              <button
+                onClick={() => goToSectionFromMenu("docs")}
+                className={`text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer ${activeSection === "docs" ? "text-accent" : "text-muted-foreground"}`}
+              >
+                Docs
+              </button>
+              <button
+                onClick={() => goToSectionFromMenu("examples")}
+                className={`text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer ${activeSection === "examples" ? "text-accent" : "text-muted-foreground"}`}
+              >
+                Examples
+              </button>
+              <button
+                onClick={() => goToSectionFromMenu("faq")}
+                className={`text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer ${activeSection === "faq" ? "text-accent" : "text-muted-foreground"}`}
+              >
+                FAQ
+              </button>
+              <button
+                onClick={() => goToSectionFromMenu("support")}
+                className={`text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer ${activeSection === "support" ? "text-accent" : "text-muted-foreground"}`}
+              >
+                Support
+              </button>
+              <a
+                href="https://github.com/ALADETAN-IFE/backend-template"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition inline-flex items-center justify-between"
+              >
+                <span>GitHub</span>
+                <span className="text-muted-foreground">➔</span>
+              </a>
             </div>
           </div>
         </div>
-      </section>
+      </nav>
+
+      {/* Hero Section */}
+      <HeroSection
+        scrollToSection={scrollToSection}
+        copyCommand={copyCommand}
+        copied={copied}
+        npmDownloadsLastMonth={npmDownloadsLastMonth}
+        npmDownloadsTotal={npmDownloadsTotal}
+      />
+
+      {/* Why Section */}
+      <WhySection />
+
+      {/* Features Section */}
+      <FeaturesSection />
+
+      {/* Workflow Section */}
+      <WorkflowSection />
+
+      {/* Docs Section */}
+      <DocsSection scrollToSection={scrollToSection} />
+
+      {/* Examples Section */}
+      <ExamplesSection />
+
+      {/* FAQ Section */}
+      <FAQSection />
+
+      {/* Support Section */}
+      <SupportSection supportEmail={SUPPORT_EMAIL} />
 
       {/* Architecture Comparison */}
       <section
@@ -494,7 +436,7 @@ const useScrollAnimation = () => {
                   "Shared database",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-sm">
-                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 text-accent">
                       <IconCheck />
                     </div>
                     {item}
@@ -525,7 +467,7 @@ const useScrollAnimation = () => {
                   "Team autonomy",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-sm">
-                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 text-accent">
                       <IconCheck />
                     </div>
                     {item}
@@ -667,7 +609,6 @@ const useScrollAnimation = () => {
             <p>
               Made with care by{" "}
               <a
-                // href="https://github.com/ALADETAN-IFE"
                 href="https://ifecodes.xyz"
                 target="_blank"
                 rel="noopener noreferrer"
