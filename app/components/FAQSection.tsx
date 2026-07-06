@@ -1,71 +1,82 @@
 import React from "react";
 
-const FAQSection = () => {
+const faqs = [
+  {
+    q: "How does this generator differ from other Express generators?",
+    a: "Unlike minimal CLI generators that copy static boilerplates, Backend Template runs an interactive, parameter-aware compilation flow. It customizes the codebase on-the-fly, installing only selected dependencies, generating language-appropriate structures, configuring specific hashes, and dynamically documenting everything in the generated project README.",
+  },
+  {
+    q: "What Node.js version do I need?",
+    a: "We recommend using a modern LTS Node.js version (e.g. Node 18 or 20+). Upgrading Node first resolves almost all package-installation or runtime compiler compatibility issues.",
+  },
+  {
+    q: "Do I need MongoDB installed?",
+    a: "Only if you opt to enable JWT Authentication during CLI setup. If authentication is toggled off, no database scripts, database configuration, or dependency packages are added to keep the template lean.",
+  },
+  {
+    q: "Does the generator support request payload validation?",
+    a: "Yes. You can opt to include request validation via Zod schemas. If enabled, Zod schema definitions and request-validation middlewares are generated next to feature modules and automatically mapped into Express route handlers.",
+  },
+  {
+    q: "Docker vs PM2 — when should I choose each?",
+    a: "Choose Docker mode if your deployment environment is containerized. It scaffolds a root docker-compose configuration alongside service Dockerfiles for multi-service coordination. Choose PM2 mode for standard process managers (e.g., bare VM) to set up PM2 ecosystems without containers.",
+  },
+  {
+    q: "How does “add service” work in microservices mode?",
+    a: "When you run the template command within an existing microservice directory (which contains a /services directory), the CLI skips metadata configuration. Instead, it enters 'add-service' mode, prompts for service-specific options, creates the service directory, and automatically rewires the API Gateway proxy routing mapping.",
+  },
+  {
+    q: "Can I generate JavaScript code instead of TypeScript?",
+    a: "Yes. Although TypeScript is selected by default, you can toggle language choices to generate clean JavaScript templates. The output will exclude all TS compiler files and typings.",
+  },
+  {
+    q: "What middleware/features can I configure during setup?",
+    a: "You can multiselect common middleware libraries: CORS (Cross-Origin Resource Sharing), Helmet (HTTP security headers), Rate Limiter (API rate limits), and Morgan (request logging). Skipped options are fully omitted from code and configuration.",
+  },
+];
+
+export default function FAQSection() {
   return (
-    <section id="faq" className="py-24 px-4 border-t border-border/50">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center space-y-4 mb-14">
-          <h2 className="text-4xl md:text-5xl font-bold text-pretty">FAQ</h2>
-          <p className="text-muted-foreground max-w-3xl mx-auto">
-            Common questions about platform support, requirements, and how the
-            generator behaves.
+    <section id="faq" className="py-24 px-4 border-t border-white/[0.04] relative">
+      <div className="max-w-4xl mx-auto space-y-16">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">FAQ</h2>
+          <p className="text-muted-foreground max-w-xl mx-auto text-base sm:text-lg">
+            Answers to common questions regarding CLI options, setups, and architecture choices.
           </p>
         </div>
 
-        <div className="max-w-3xl mx-auto space-y-4">
-          {[
-            {
-              q: "Does it work on Windows?",
-              a: "Yes. The CLI is designed to work on Windows, macOS, and Linux. For password hashing, bcrypt is the most Windows-friendly default.",
-            },
-            {
-              q: "What Node.js version do I need?",
-              a: "Use a modern LTS Node.js version. If you run into any install/runtime issues, update Node first (LTS) before anything else.",
-            },
-            {
-              q: "Do I need MongoDB?",
-              a: "Only if you enable Authentication. If auth is OFF, the output stays clean: no DB wiring, no JWT logic, no auth service.",
-            },
-            {
-              q: "Does the generator include request validation?",
-              a: "Yes. You can opt to include request validation using Zod schemas. If enabled, Zod schema files and request validation middlewares are automatically scaffolded and wired into the generated API endpoints (e.g., auth, health).",
-            },
-            {
-              q: "Docker vs PM2 — when should I choose each?",
-              a: "Docker mode generates compose + Dockerfiles for containerized services. PM2 mode skips Docker and sets up process-managed deployment. Choose based on your deployment environment.",
-            },
-            {
-              q: "How does “add service” work in microservices?",
-              a: "When the CLI detects an existing microservice workspace (a /services folder), it switches into add-service mode: it prompts for a new service name and optional features/auth, then updates gateway routing automatically.",
-            },
-            {
-              q: "Can I generate JavaScript instead of TypeScript?",
-              a: "Yes. You can pick TypeScript (default) or JavaScript. The output matches your selection (no TS config in JS projects).",
-            },
-            {
-              q: "What middleware/features can I include?",
-              a: "You can select middleware like CORS, Helmet, Rate Limiting, and Morgan. Only what you select gets added to dependencies and wired into the app.",
-            },
-          ].map((item) => (
+        {/* FAQ Accordion list */}
+        <div className="space-y-4">
+          {faqs.map((item, idx) => (
             <details
-              key={item.q}
-              className="group bg-card/60 border border-border rounded-xl p-5"
+              key={idx}
+              className="group glass rounded-2xl p-5 border border-white/5 transition-all duration-300 [&_summary::-webkit-details-marker]:hidden"
             >
-              <summary className="cursor-pointer list-none flex items-center justify-between gap-4 select-none">
-                <span className="font-semibold">{item.q}</span>
-                <span className="text-muted-foreground group-open:text-accent transition">
-                  +
+              <summary className="flex items-center justify-between gap-4 font-semibold text-sm sm:text-base cursor-pointer list-none select-none tracking-tight">
+                <span>{item.q}</span>
+                <span className="flex-shrink-0 w-6 h-6 rounded-lg bg-white/5 group-open:bg-accent/10 flex items-center justify-center transition-colors">
+                  <svg
+                    className="w-3.5 h-3.5 text-muted-foreground group-open:text-accent transition-transform duration-300 group-open:rotate-180"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
                 </span>
               </summary>
-              <p className="text-sm text-muted-foreground mt-3 leading-relaxed">
+              <div className="mt-3.5 pt-3.5 border-t border-white/[0.04] text-xs sm:text-sm text-muted-foreground leading-relaxed">
                 {item.a}
-              </p>
+              </div>
             </details>
           ))}
         </div>
       </div>
     </section>
   );
-};
-
-export default FAQSection;
+}

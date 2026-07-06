@@ -1,172 +1,118 @@
 import React from "react";
 
-const ExamplesSection = () => {
+export default function ExamplesSection() {
   return (
-    <section
-      id="examples"
-      className="py-24 px-4 bg-card/30 border-t border-border/50"
-    >
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center space-y-4 mb-14">
-          <h2 className="text-4xl md:text-5xl font-bold text-pretty">
-            Examples
-          </h2>
-          <p className="text-muted-foreground max-w-3xl mx-auto">
-            Example layouts produced by the CLI when authentication is
-            disabled (no auth).
+    <section id="examples" className="py-24 px-4 border-t border-white/[0.04] relative">
+      <div className="max-w-6xl mx-auto space-y-16">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight">Examples</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto text-base sm:text-lg">
+            Compare generated workspace structures. Only the configurations you select are generated.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 items-start">
-          <div className="bg-card/60 border border-border rounded-xl p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold">
-                Microservice (no auth)
-              </h3>
-              <span className="text-xs text-muted-foreground">Workspace</span>
+        {/* Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          {/* Microservices (No Auth) */}
+          <div className="glass rounded-2xl p-6 md:p-8 space-y-5 shadow-lg shadow-black/15">
+            <div className="flex items-center justify-between border-b border-white/5 pb-4">
+              <h3 className="text-lg font-bold tracking-tight">Microservices (No Auth)</h3>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-accent px-2 py-0.5 rounded-full bg-accent/10">Workspace</span>
             </div>
-            <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-xs text-accent overflow-x-auto whitespace-pre">
-              {`my-workspace/
-  services/
-    gateway/
-    health-service/
-  shared/
-    config/
-    utils/
-  package.json
-  README.md
-  .env.example`}
-            </div>
-            <div className="text-sm text-muted-foreground space-y-2 leading-relaxed">
-              <p>Notes:</p>
-              <ul className="space-y-1">
-                <li>
-                  • Docker mode adds{" "}
-                  <span className="font-mono text-foreground">
-                    docker-compose.yml
-                  </span>{" "}
-                  at the repo root.
-                </li>
-                <li>
-                  • PM2 (nodocker) adds{" "}
-                  <span className="font-mono text-foreground">
-                    pm2.config.js
-                  </span>{" "}
-                  at the repo root.
-                </li>
-                <li>
-                  • If auth is enabled,{" "}
-                  <span className="font-mono text-foreground">
-                    auth-service/
-                  </span>{" "}
-                  appears under{" "}
-                  <span className="font-mono text-foreground">services/</span>
-                  .
-                </li>
+            <pre className="bg-black/40 border border-white/5 rounded-xl p-4 font-mono text-xs text-accent overflow-x-auto leading-relaxed">
+{`my-workspace/
+├── services/
+│   ├── gateway/         # Reverse proxy / Router (Port 4000)
+│   └── health-service/  # Endpoint status checks (Port 4001)
+├── shared/
+│   ├── config/          # Common env variable mappings
+│   └── utils/           # Shared logger & error middleware
+├── package.json         # Workspace scripts
+├── README.md
+└── .env.example`}
+            </pre>
+            <div className="text-xs text-muted-foreground space-y-2.5 leading-relaxed pt-2">
+              <p className="font-semibold text-foreground/80">Architecture Notes:</p>
+              <ul className="space-y-1.5 list-disc pl-4">
+                <li>Docker mode appends <code className="text-foreground font-mono bg-white/5 px-1 py-0.5 rounded text-[10px]">docker-compose.yml</code> and service Dockerfiles.</li>
+                <li>PM2 mode configures a top-level <code className="text-foreground font-mono bg-white/5 px-1 py-0.5 rounded text-[10px]">pm2.config.js</code> file instead of containers.</li>
+                <li>If Auth is enabled, a dedicated <code className="text-foreground font-mono bg-white/5 px-1 py-0.5 rounded text-[10px]">auth-service/</code> (Port 4002) is scaffolded.</li>
               </ul>
             </div>
           </div>
 
-          <div className="space-y-8">
-            <div className="bg-card/60 border border-border rounded-xl p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold">
-                  Microservice (Docker mode)
-                </h3>
-                <span className="text-xs text-muted-foreground">
-                  docker-compose
-                </span>
+          {/* Docker vs PM2 configs */}
+          <div className="space-y-6">
+            {/* Docker configuration preview */}
+            <div className="glass rounded-2xl p-6 md:p-8 space-y-4 shadow-lg shadow-black/15">
+              <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                <h3 className="text-base font-bold tracking-tight">Microservice Docker Mode</h3>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-purple-400 px-2 py-0.5 rounded-full bg-purple-500/10">Containers</span>
               </div>
-              <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-xs text-accent overflow-x-auto whitespace-pre">
-                {`my-workspace/
-  services/
-    gateway/
-    health-service/
-  shared/
-    config/
-    utils/
-  docker-compose.yml
-  package.json
-  README.md
-  .env.example`}
-              </div>
+              <pre className="bg-black/40 border border-white/5 rounded-xl p-4 font-mono text-xs text-accent overflow-x-auto leading-relaxed">
+{`my-workspace/
+├── services/
+│   ├── gateway/
+│   │   └── Dockerfile
+│   └── health-service/
+│       └── Dockerfile
+├── docker-compose.yml   # Multi-service run config
+├── package.json
+└── README.md`}
+              </pre>
             </div>
 
-            <div className="bg-card/60 border border-border rounded-xl p-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold">
-                  Microservice (PM2 mode)
-                </h3>
-                <span className="text-xs text-muted-foreground">
-                  nodocker
-                </span>
+            {/* PM2 Configuration preview */}
+            <div className="glass rounded-2xl p-6 md:p-8 space-y-4 shadow-lg shadow-black/15">
+              <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                <h3 className="text-base font-bold tracking-tight">Microservice PM2 Mode</h3>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-accent px-2 py-0.5 rounded-full bg-accent/10">Process Managed</span>
               </div>
-              <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-xs text-accent overflow-x-auto whitespace-pre">
-                {`my-workspace/
-  services/
-    gateway/
-    health-service/
-  shared/
-    config/
-    utils/
-  pm2.config.js
-  package.json
-  README.md
-  .env.example`}
-              </div>
+              <pre className="bg-black/40 border border-white/5 rounded-xl p-4 font-mono text-xs text-accent overflow-x-auto leading-relaxed">
+{`my-workspace/
+├── services/
+│   ├── gateway/
+│   └── health-service/
+├── pm2.config.js        # Core PM2 run configurations
+├── package.json
+└── README.md`}
+              </pre>
             </div>
           </div>
         </div>
 
-        <div className="mt-8 bg-card/60 border border-border rounded-xl p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold">Monolith (no auth)</h3>
-            <span className="text-xs text-muted-foreground">Single repo</span>
+        {/* Monolith layout details */}
+        <div className="glass rounded-2xl p-6 md:p-8 space-y-5 shadow-lg shadow-black/15">
+          <div className="flex items-center justify-between border-b border-white/5 pb-4">
+            <h3 className="text-lg font-bold tracking-tight">Monolith Layout (No Auth)</h3>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-accent px-2 py-0.5 rounded-full bg-accent/10">Single Repo</span>
           </div>
-          <div className="bg-secondary/60 border border-border rounded-lg p-4 font-mono text-xs text-accent overflow-x-auto whitespace-pre">
-            {`my-monolith-app/
-  src/
-    config/
-    middlewares/
-    modules/
-      v1/
-        health/
-    utils/
-    app.ts (or app.js)
-    routes.ts (or routes.js)
-    server.ts (or server.js)
-  package.json
-  README.md
-  .env.example`}
-          </div>
-          <div className="text-sm text-muted-foreground space-y-2 leading-relaxed">
-            <p>Notes:</p>
-            <ul className="space-y-1">
-              <li>
-                • If auth is enabled, the monolith includes{" "}
-                <span className="font-mono text-foreground">
-                  src/modules/v1/auth/
-                </span>{" "}
-                and{" "}
-                <span className="font-mono text-foreground">src/models/</span>
-                .
-              </li>
-              <li>
-                • Tooling (ESLint, Prettier, Husky) is configured at the
-                repository root.
-              </li>
-              <li>
-                • The root{" "}
-                <span className="font-mono text-foreground">README.md</span>{" "}
-                is generated and updated when you add services in microservice
-                mode.
-              </li>
+          <pre className="bg-black/40 border border-white/5 rounded-xl p-4 font-mono text-xs text-accent overflow-x-auto leading-relaxed">
+{`my-monolith-app/
+├── src/
+│   ├── config/          # Configurations and key validation
+│   ├── middlewares/    # Custom Express filters (CORS, Rate Limiting, etc.)
+│   ├── modules/
+│   │   └── v1/
+│   │       └── health/  # API endpoints for health status checking
+│   ├── utils/           # Global logger wrapper
+│   ├── app.ts           # Central Express app declarations
+│   ├── routes.ts        # Central Routing mapping file
+│   └── server.ts        # Listening port initialization
+├── package.json
+└── README.md`}
+          </pre>
+          <div className="text-xs text-muted-foreground space-y-2.5 leading-relaxed pt-2">
+            <p className="font-semibold text-foreground/80">Architecture Notes:</p>
+            <ul className="space-y-1.5 list-disc pl-4">
+              <li>Enabling authentication adds <code className="text-foreground font-mono bg-white/5 px-1 py-0.5 rounded text-[10px]">src/models/</code> and <code className="text-foreground font-mono bg-white/5 px-1 py-0.5 rounded text-[10px]">src/modules/v1/auth/</code> folder structures.</li>
+              <li>Development dependencies like Prettier, ESLint, and Husky are loaded in the repository root.</li>
+              <li>Zod request schemas are integrated directly next to the module endpoints under <code className="text-foreground font-mono bg-white/5 px-1 py-0.5 rounded text-[10px]">modules/v1/[feature]/schemas/</code>.</li>
             </ul>
           </div>
         </div>
       </div>
     </section>
   );
-};
-
-export default ExamplesSection;
+}

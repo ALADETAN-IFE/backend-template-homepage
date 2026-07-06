@@ -9,121 +9,132 @@ interface WorkflowModalProps {
 const WorkflowModal: React.FC<WorkflowModalProps> = ({ path, onClose }) => {
   const workflows = {
     monolith: {
-      title: "Monolith Workflow",
+      title: "Monolith Setup Flow",
       prompts: [
         {
           q: "Project name",
-          a: 'Defaults to "my-backend" (from args if provided)',
+          a: 'Defines output folder. Defaults to "my-backend" (or CLI parameter).',
         },
-        { q: "Language", a: "TypeScript (default) or JavaScript templates" },
         {
-          q: "Description / author / keywords",
-          a: "Optional; written to package.json + README",
+          q: "Language",
+          a: "TypeScript (recommended) or ES6 JavaScript template scaffolding.",
         },
-        { q: "Features", a: "Multiselect: CORS, Rate Limit, Helmet, Morgan" },
-        { q: "Authentication?", a: "Toggle JWT + MongoDB on/off" },
         {
-          q: "Password hasher (if auth)",
-          a: "bcrypt on Windows by default, argon2 elsewhere",
+          q: "Description / Author / Keywords",
+          a: "Optional prompts to automatically inject metadata into package.json.",
         },
         {
           q: "Project Scope",
-          a: "Team (adds CI/CD, PR template, contributing guide) or Individual",
+          a: "Team (creates .github actions workflows, PR templates, and CONTRIBUTING.md) or Individual.",
         },
         {
-          q: "Request validation?",
-          a: "Toggle request validation with Zod schemas on/off",
+          q: "Features",
+          a: "Multiselect: CORS configuration, Helmet security, Rate Limiting, and Morgan logging.",
+        },
+        {
+          q: "Authentication",
+          a: "Toggle JWT auth. Sets up User database models, login/register routes, and authentication filters.",
+        },
+        {
+          q: "Password Hasher (if auth)",
+          a: "bcrypt (auto-selected on Windows for reliability) or argon2 (recommended elsewhere).",
+        },
+        {
+          q: "Request Validation",
+          a: "Toggle Zod payload verification. Scaffolds schema files and checks body inputs at route level.",
         },
       ],
       result:
-        "Single Express app with only the middleware and auth you selected.",
+        "Single Node/Express repository. Generates clean app initialization, standard directory structure, and only selected features.",
     },
     microservices: {
-      title: "Microservices Workflow",
+      title: "Microservices Setup Flow",
       prompts: [
-        { q: "Workspace name", a: "From args (mono/micro) or prompt if new" },
-        { q: "Language", a: "TypeScript (default) or JavaScript templates" },
-        { q: "Mode", a: "Docker (compose + Dockerfiles) or PM2 (no Docker)" },
-        { q: "Features", a: "Multiselect: CORS, Rate Limit, Helmet, Morgan" },
-        { q: "Authentication?", a: "Toggle JWT + MongoDB on/off" },
         {
-          q: "Password hasher (if auth)",
-          a: "bcrypt on Windows by default, argon2 elsewhere",
+          q: "Workspace name",
+          a: "Scaffolds root monorepo. Inferred from CLI argument or interactive prompt.",
+        },
+        {
+          q: "Language",
+          a: "TypeScript (recommended) or ES6 JavaScript template scaffolding.",
+        },
+        {
+          q: "Mode",
+          a: "Docker (docker-compose configuration + Dockerfiles) or PM2 (pm2.config.js process definitions).",
         },
         {
           q: "Project Scope",
-          a: "Team (adds CI/CD, PR template, contributing guide) or Individual",
+          a: "Team (creates .github actions workflows, PR templates, and CONTRIBUTING.md) or Individual.",
         },
         {
-          q: "Request validation?",
-          a: "Toggle request validation with Zod schemas on/off",
+          q: "Features",
+          a: "Global features: CORS configuration, Helmet security, Rate Limiting, and Morgan logging.",
         },
         {
-          q: "Adding a service in an existing workspace?",
-          a: "CLI detects /services ➔ ask for service name + per-service features + auth toggle + hasher",
+          q: "Authentication",
+          a: "JWT Auth. Adds user DB connection configs and scaffolds an isolated auth-service container/process.",
+        },
+        {
+          q: "Password Hasher (if auth)",
+          a: "bcrypt (auto-selected on Windows for reliability) or argon2 (recommended elsewhere).",
+        },
+        {
+          q: "Request Validation",
+          a: "Toggle Zod payload verification. Scaffolds schema files and checks body inputs at service routing level.",
+        },
+        {
+          q: "Adding subsequent services?",
+          a: "If the CLI is executed in a directory containing a /services folder, it runs in 'add-service' mode, prompts for service specifications, and updates API gateway proxies automatically.",
         },
       ],
       result:
-        "Gateway + health (+ auth if enabled) with Docker or PM2, plus shared utils. Add services later by rerunning the CLI.",
+        "Comprehensive distributed workspace. Generates API Gateway router, shared config/utils, and service modules ready to scale.",
     },
   };
 
   const workflow = workflows[path];
 
   return (
-    <div
-      className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-card border border-accent/30 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto space-y-6 p-8 animate-fade-in-up"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between">
-          <h2 className="text-3xl font-bold">{workflow.title}</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#09090b]/80 backdrop-blur-md animate-fade-in">
+      {/* Modal Card container */}
+      <div className="relative w-full max-w-2xl max-h-[85vh] flex flex-col glass-strong rounded-2xl shadow-2xl border border-white/10 animate-fade-in-up overflow-hidden">
+        {/* Modal Header */}
+        <div className="flex items-center justify-between px-6 py-4.5 border-b border-white/[0.06]">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">{workflow.title}</h2>
           <button
             onClick={onClose}
-            className="text-muted-foreground hover:text-accent transition cursor-pointer"
+            className="w-8 h-8 rounded-lg flex items-center justify-center bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition cursor-pointer text-muted-foreground hover:text-foreground active:scale-95"
+            aria-label="Close modal"
           >
             <IconClose />
           </button>
         </div>
 
-        <div className="space-y-4">
-          <p className="text-muted-foreground">CLI prompts you’ll see:</p>
-          <div className="space-y-3">
-            {workflow.prompts.map((item, idx) => (
-              <div
-                key={idx}
-                className="bg-secondary/50 border border-border rounded-lg p-4 space-y-2"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="text-sm font-mono text-accent min-w-fit">
-                    ➔
+        {/* Modal Scrollable Body */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-5">
+          <div className="space-y-4">
+            <p className="text-xs font-bold uppercase tracking-wider text-accent font-mono">Setup steps & CLI prompts:</p>
+            <div className="space-y-3.5">
+              {workflow.prompts.map((step, idx) => (
+                <div key={idx} className="flex gap-4 p-4 rounded-xl border border-white/5 bg-white/[0.01]">
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-accent/10 border border-accent/25 flex items-center justify-center font-mono text-[10px] font-bold text-accent">
+                    {idx + 1}
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm text-muted-foreground">{item.q}</p>
-                    <p className="font-mono text-accent text-sm mt-1">
-                      {item.a}
-                    </p>
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold tracking-tight text-foreground">{step.q}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{step.a}</p>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="bg-accent/10 border border-accent/30 rounded-lg p-4 space-y-2">
-          <p className="text-sm font-semibold">Result:</p>
-          <p className="text-sm text-muted-foreground">{workflow.result}</p>
+        {/* Modal Footer */}
+        <div className="px-6 py-4.5 border-t border-white/[0.06] bg-white/[0.01] text-xs text-muted-foreground leading-relaxed">
+          <span className="font-semibold text-foreground/80">Scaffold result: </span>
+          {workflow.result}
         </div>
-
-        <button
-          onClick={onClose}
-          className="w-full px-6 py-3 bg-accent text-primary font-semibold rounded-lg hover:bg-cyan-300 transition-all duration-200 cursor-pointer"
-        >
-          Close
-        </button>
       </div>
     </div>
   );

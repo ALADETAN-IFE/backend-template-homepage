@@ -11,8 +11,8 @@ import ExamplesSection from "./components/ExamplesSection";
 import FAQSection from "./components/FAQSection";
 import SupportSection from "./components/SupportSection";
 import WorkflowModal from "./components/WorkflowModal";
-import { IconArrow, IconGit, IconCheck } from "./components/Icons";
 
+/* ─── Scroll-triggered fade-in ─── */
 const useScrollAnimation = () => {
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -25,7 +25,7 @@ const useScrollAnimation = () => {
           }
         });
       },
-      { threshold: 0.1 },
+      { threshold: 0.08 },
     );
 
     const elements = Array.from(document.querySelectorAll("[data-scroll]"));
@@ -42,7 +42,6 @@ const useScrollAnimation = () => {
       }
     });
 
-    // Fallback: ensure nothing stays hidden if observer misses (e.g., reload + no scroll)
     const fallback = window.setTimeout(() => {
       elements.forEach((el) => {
         if (el.classList.contains("opacity-0")) {
@@ -51,7 +50,7 @@ const useScrollAnimation = () => {
           observer.unobserve(el);
         }
       });
-    }, 800);
+    }, 1200);
 
     return () => {
       window.clearTimeout(fallback);
@@ -59,6 +58,16 @@ const useScrollAnimation = () => {
     };
   }, []);
 };
+
+/* ─── Nav links ─── */
+const NAV_ITEMS = [
+  { id: "features", label: "Features" },
+  { id: "cli-workflow", label: "Workflow" },
+  { id: "docs", label: "Docs" },
+  { id: "examples", label: "Examples" },
+  { id: "faq", label: "FAQ" },
+  { id: "support", label: "Support" },
+] as const;
 
 export default function Home() {
   const SUPPORT_EMAIL = "fortuneifealadetan01@gmail.com";
@@ -69,17 +78,16 @@ export default function Home() {
   const [npmDownloadsLastMonth, setNpmDownloadsLastMonth] = useState<
     number | null
   >(null);
-  const [npmDownloadsTotal, setNpmDownloadsTotal] = useState<
-    number | null
-  >(null);
+  const [npmDownloadsTotal, setNpmDownloadsTotal] = useState<number | null>(
+    null,
+  );
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [burgerSpinning, setBurgerSpinning] = useState(false);
-  const [burgerSpinKey, setBurgerSpinKey] = useState(0);
+  const [scrolled, setScrolled] = useState(false);
 
   useScrollAnimation();
 
-  // Prefer staying at top on reload, but do not fight the user if they scroll during load
+  /* Scroll restoration */
   useEffect(() => {
     type ScrollRestorationType = "auto" | "manual";
     let restored: ScrollRestorationType | undefined;
@@ -87,14 +95,11 @@ export default function Home() {
       restored = window.history.scrollRestoration;
       window.history.scrollRestoration = "manual";
     }
-
-    // Only auto-scroll if we are already near the top (user hasn’t started scrolling)
     const raf = window.requestAnimationFrame(() => {
       if (window.scrollY <= 8) {
         window.scrollTo({ top: 0, behavior: "auto" });
       }
     });
-
     return () => {
       window.cancelAnimationFrame(raf);
       if (restored !== undefined) {
@@ -103,6 +108,7 @@ export default function Home() {
     };
   }, []);
 
+  /* NPM download stats */
   useEffect(() => {
     let cancelled = false;
 
@@ -110,9 +116,7 @@ export default function Home() {
       try {
         const res = await fetch(
           "https://api.npmjs.org/downloads/point/last-month/@ifecodes/backend-template",
-          {
-            cache: "no-store",
-          },
+          { cache: "no-store" },
         );
         if (!res.ok) return;
         const data = await res.json();
@@ -121,7 +125,7 @@ export default function Home() {
           return;
         if (!cancelled) setNpmDownloadsLastMonth(downloads);
       } catch {
-        // ignore (optional UI)
+        /* optional UI */
       }
     };
 
@@ -129,9 +133,7 @@ export default function Home() {
       try {
         const res = await fetch(
           "https://api.npmjs.org/downloads/point/2026-01-10:2099-12-31/@ifecodes/backend-template",
-          {
-            cache: "no-store",
-          },
+          { cache: "no-store" },
         );
         if (!res.ok) return;
         const data = await res.json();
@@ -140,7 +142,7 @@ export default function Home() {
           return;
         if (!cancelled) setNpmDownloadsTotal(downloads);
       } catch {
-        // ignore (optional UI)
+        /* optional UI */
       }
     };
 
@@ -167,29 +169,18 @@ export default function Home() {
     }
   };
 
-  const toggleMobileMenu = () => {
-    setBurgerSpinning(true);
-    setBurgerSpinKey((k) => k + 1); // force reflow so animation restarts every click
-    window.setTimeout(() => setBurgerSpinning(false), 600);
-    setMobileMenuOpen((v) => !v);
-  };
-
   const goToSectionFromMenu = (id: string) => {
     setMobileMenuOpen(false);
     scrollToSection(id);
   };
 
+  /* Active section tracking */
   useEffect(() => {
-    const sectionIds = [
-      "features",
-      "cli-workflow",
-      "docs",
-      "examples",
-      "faq",
-      "support",
-    ];
+    const sectionIds = NAV_ITEMS.map((i) => i.id);
 
     const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+
       let current: string | null = null;
       for (const id of sectionIds) {
         const el = document.getElementById(id);
@@ -211,68 +202,57 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 opacity-40">
-        <div className="absolute -top-20 -left-10 h-72 w-72 rounded-full bg-accent/20 blur-3xl" />
-        <div className="absolute top-1/3 -right-10 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
-        <div className="absolute bottom-10 left-1/3 h-64 w-64 rounded-full bg-accent/10 blur-3xl" />
+      {/* ─── Ambient glow blobs ─── */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute -top-40 -left-40 h-[500px] w-[500px] rounded-full bg-accent/[0.07] blur-[120px] animate-float" />
+        <div className="absolute top-1/3 -right-40 h-[500px] w-[500px] rounded-full bg-purple-500/[0.05] blur-[120px] animate-float" style={{ animationDelay: "2s" }} />
+        <div className="absolute bottom-20 left-1/4 h-[400px] w-[400px] rounded-full bg-accent/[0.04] blur-[120px] animate-float" style={{ animationDelay: "4s" }} />
       </div>
 
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full bg-background/80 backdrop-blur-md z-50 border-b border-border/50">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      {/* ─── Navigation ─── */}
+      <nav
+        className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+          scrolled
+            ? "bg-background/70 backdrop-blur-xl border-b border-white/[0.06] shadow-lg shadow-black/20"
+            : "bg-transparent border-b border-transparent"
+        }`}
+      >
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-br from-accent to-accent/60 rounded flex items-center justify-center font-bold text-primary text-sm">
+            <div className="w-8 h-8 bg-gradient-to-br from-accent to-purple-500 rounded-lg flex items-center justify-center font-bold text-[#09090b] text-sm shadow-lg shadow-accent/20">
               B
             </div>
-            <span className="font-semibold text-lg hidden sm:inline">
+            <span className="font-semibold text-lg hidden sm:inline tracking-tight">
               Backend Template
             </span>
           </div>
 
           {/* Desktop nav */}
-          <div className="hidden sm:flex items-center gap-6">
-            <button
-              onClick={() => scrollToSection("features")}
-              className={`text-sm transition cursor-pointer ${activeSection === "features" ? "text-accent" : "text-muted-foreground hover:text-foreground active:text-accent"}`}
-            >
-              Features
-            </button>
-            <button
-              onClick={() => scrollToSection("cli-workflow")}
-              className={`text-sm transition cursor-pointer ${activeSection === "cli-workflow" ? "text-accent" : "text-muted-foreground hover:text-foreground active:text-accent"}`}
-            >
-              CLI Workflow
-            </button>
-            <button
-              onClick={() => scrollToSection("docs")}
-              className={`hidden sm:inline text-sm transition cursor-pointer ${activeSection === "docs" ? "text-accent" : "text-muted-foreground hover:text-foreground active:text-accent"}`}
-            >
-              Docs
-            </button>
-            <button
-              onClick={() => scrollToSection("examples")}
-              className={`hidden sm:inline text-sm transition cursor-pointer ${activeSection === "examples" ? "text-accent" : "text-muted-foreground hover:text-foreground active:text-accent"}`}
-            >
-              Examples
-            </button>
-            <button
-              onClick={() => scrollToSection("faq")}
-              className={`hidden md:inline text-sm transition cursor-pointer ${activeSection === "faq" ? "text-accent" : "text-muted-foreground hover:text-foreground active:text-accent"}`}
-            >
-              FAQ
-            </button>
-            <button
-              onClick={() => scrollToSection("support")}
-              className={`hidden md:inline text-sm transition cursor-pointer ${activeSection === "support" ? "text-accent" : "text-muted-foreground hover:text-foreground active:text-accent"}`}
-            >
-              Support
-            </button>
+          <div className="hidden md:flex items-center gap-1">
+            {NAV_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => scrollToSection(item.id)}
+                className={`px-3 py-1.5 rounded-lg text-sm transition-all duration-200 cursor-pointer ${
+                  activeSection === item.id
+                    ? "text-accent bg-accent/10"
+                    : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+            <div className="w-px h-5 bg-white/10 mx-2" />
             <a
               href="https://github.com/ALADETAN-IFE/backend-template"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-muted-foreground hover:text-accent transition"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition-all duration-200"
             >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
               GitHub
             </a>
           </div>
@@ -280,104 +260,63 @@ export default function Home() {
           {/* Mobile burger */}
           <button
             type="button"
-            onClick={toggleMobileMenu}
+            onClick={() => setMobileMenuOpen((v) => !v)}
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileMenuOpen}
-            className="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg border border-border bg-card/40 hover:bg-card transition active:scale-95 cursor-pointer"
+            className="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg border border-white/[0.06] bg-white/[0.03] hover:bg-white/[0.06] transition active:scale-95 cursor-pointer"
           >
-            <span
-              key={burgerSpinKey}
-              className={`inline-flex ${burgerSpinning ? "animate-spin-once" : ""} cursor-pointer`}
-            >
-              {mobileMenuOpen ? (
-                <svg
-                  className="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                >
-                  <path d="M6 6l12 12" />
-                  <path d="M18 6l-12 12" />
-                </svg>
-              ) : (
-                <svg
-                  className="w-5 h-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                >
-                  <path d="M4 6h16" />
-                  <path d="M4 12h16" />
-                  <path d="M4 18h16" />
-                </svg>
-              )}
-            </span>
+            {mobileMenuOpen ? (
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M6 6l12 12" />
+                <path d="M18 6l-12 12" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M4 6h16" />
+                <path d="M4 12h16" />
+                <path d="M4 18h16" />
+              </svg>
+            )}
           </button>
         </div>
 
-        {/* Mobile menu panel */}
+        {/* Mobile menu */}
         <div
-          className={`sm:hidden overflow-hidden border-t border-border/50 transition-all duration-300 ${mobileMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}`}
+          className={`md:hidden overflow-hidden border-t border-white/[0.04] transition-all duration-300 ${
+            mobileMenuOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+          }`}
         >
-          <div
-            className={`px-4 py-4 transition-transform duration-300 ${mobileMenuOpen ? "translate-y-0" : "-translate-y-2"}`}
-          >
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={() => goToSectionFromMenu("features")}
-                className={`text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer ${activeSection === "features" ? "text-accent" : "text-muted-foreground"}`}
-              >
-                Features
-              </button>
-              <button
-                onClick={() => goToSectionFromMenu("cli-workflow")}
-                className={`text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer ${activeSection === "cli-workflow" ? "text-accent" : "text-muted-foreground"}`}
-              >
-                CLI Workflow
-              </button>
-              <button
-                onClick={() => goToSectionFromMenu("docs")}
-                className={`text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer ${activeSection === "docs" ? "text-accent" : "text-muted-foreground"}`}
-              >
-                Docs
-              </button>
-              <button
-                onClick={() => goToSectionFromMenu("examples")}
-                className={`text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer ${activeSection === "examples" ? "text-accent" : "text-muted-foreground"}`}
-              >
-                Examples
-              </button>
-              <button
-                onClick={() => goToSectionFromMenu("faq")}
-                className={`text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer ${activeSection === "faq" ? "text-accent" : "text-muted-foreground"}`}
-              >
-                FAQ
-              </button>
-              <button
-                onClick={() => goToSectionFromMenu("support")}
-                className={`text-left px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition cursor-pointer ${activeSection === "support" ? "text-accent" : "text-muted-foreground"}`}
-              >
-                Support
-              </button>
+          <div className="px-4 py-3 bg-background/90 backdrop-blur-xl">
+            <div className="flex flex-col gap-1">
+              {NAV_ITEMS.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => goToSectionFromMenu(item.id)}
+                  className={`text-left px-4 py-2.5 rounded-lg transition cursor-pointer ${
+                    activeSection === item.id
+                      ? "text-accent bg-accent/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/[0.04]"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
+              <div className="h-px bg-white/[0.06] my-1" />
               <a
                 href="https://github.com/ALADETAN-IFE/backend-template"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-3 py-2 rounded-lg bg-card/30 hover:bg-card/60 border border-border/50 hover:border-accent/30 transition inline-flex items-center justify-between"
+                className="flex items-center justify-between px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/[0.04] transition"
               >
                 <span>GitHub</span>
-                <span className="text-muted-foreground">➔</span>
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
               </a>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* ─── Sections ─── */}
       <HeroSection
         scrollToSection={scrollToSection}
         copyCommand={copyCommand}
@@ -386,48 +325,43 @@ export default function Home() {
         npmDownloadsTotal={npmDownloadsTotal}
       />
 
-      {/* Why Section */}
       <WhySection />
 
-      {/* Features Section */}
       <FeaturesSection />
 
-      {/* Workflow Section */}
       <WorkflowSection />
 
-      {/* Docs Section */}
       <DocsSection scrollToSection={scrollToSection} />
 
-      {/* Examples Section */}
       <ExamplesSection />
 
-      {/* FAQ Section */}
       <FAQSection />
 
-      {/* Support Section */}
       <SupportSection supportEmail={SUPPORT_EMAIL} />
 
-      {/* Architecture Comparison */}
+      {/* ─── Architecture Comparison ─── */}
       <section
         id="getting-started"
-        className="py-24 px-4 bg-card/30 border-t border-border/50"
+        className="py-24 px-4 border-t border-white/[0.04]"
       >
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-20 text-pretty">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 tracking-tight">
             Choose Your Path
           </h2>
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Monolith */}
             <button
               onClick={() => setSelectedPath("monolith")}
-              className="border border-border rounded-lg p-8 space-y-6 hover:border-accent/50 hover:bg-secondary/30 transition-all duration-300 animate-fade-in-up text-left cursor-pointer group"
-              style={{ animationDelay: "0s", animationFillMode: "both" }}
+              className="glass text-left p-8 rounded-2xl space-y-6 hover:border-accent/30 transition-all duration-300 group cursor-pointer hover:-translate-y-1"
             >
-              <h3 className="text-2xl font-bold group-hover:text-accent transition">
-                Monolith
-              </h3>
-              <p className="text-muted-foreground">
-                Perfect for MVPs and small to medium projects
-              </p>
+              <div>
+                <h3 className="text-2xl font-bold group-hover:text-accent transition-colors">
+                  Monolith
+                </h3>
+                <p className="text-muted-foreground mt-2">
+                  Perfect for MVPs and small to medium projects
+                </p>
+              </div>
               <ul className="space-y-3">
                 {[
                   "Single codebase",
@@ -436,29 +370,32 @@ export default function Home() {
                   "Shared database",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-sm">
-                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 text-accent">
-                      <IconCheck />
+                    <div className="w-5 h-5 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
                     {item}
                   </li>
                 ))}
               </ul>
-              <div className="pt-4 text-xs text-accent group-hover:text-cyan-300 transition">
-                View CLI prompts for this path →
+              <div className="pt-2 text-xs text-accent group-hover:text-cyan-300 transition flex items-center gap-1">
+                View CLI prompts for this path
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
               </div>
             </button>
 
+            {/* Microservices */}
             <button
               onClick={() => setSelectedPath("microservices")}
-              className="border border-accent/50 bg-accent/5 rounded-lg p-8 space-y-6 hover:border-accent hover:bg-accent/10 transition-all duration-300 animate-fade-in-up text-left cursor-pointer group"
-              style={{ animationDelay: "0.1s", animationFillMode: "both" }}
+              className="text-left p-8 rounded-2xl space-y-6 transition-all duration-300 group cursor-pointer hover:-translate-y-1 bg-gradient-to-br from-accent/[0.08] to-purple-500/[0.04] border border-accent/20 hover:border-accent/40 backdrop-blur-sm"
             >
-              <h3 className="text-2xl font-bold group-hover:text-cyan-300 transition">
-                Microservices
-              </h3>
-              <p className="text-muted-foreground">
-                For scaling and independent deployments
-              </p>
+              <div>
+                <h3 className="text-2xl font-bold group-hover:text-cyan-300 transition-colors">
+                  Microservices
+                </h3>
+                <p className="text-muted-foreground mt-2">
+                  For scaling and independent deployments
+                </p>
+              </div>
               <ul className="space-y-3">
                 {[
                   "Independent scaling",
@@ -467,18 +404,21 @@ export default function Home() {
                   "Team autonomy",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-sm">
-                    <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 text-accent">
-                      <IconCheck />
+                    <div className="w-5 h-5 rounded-full bg-accent/15 flex items-center justify-center flex-shrink-0">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
                     {item}
                   </li>
                 ))}
               </ul>
-              <div className="pt-4 text-xs text-muted-foreground border-t border-accent/20">
-                <p>Includes Docker & PM2 for deployment</p>
+              <div className="pt-4 border-t border-accent/10">
+                <p className="text-xs text-muted-foreground">
+                  Includes Docker & PM2 for deployment
+                </p>
               </div>
-              <div className="text-xs text-accent group-hover:text-cyan-300 transition">
-                View CLI prompts for this path →
+              <div className="text-xs text-accent group-hover:text-cyan-300 transition flex items-center gap-1">
+                View CLI prompts for this path
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
               </div>
             </button>
           </div>
@@ -492,13 +432,13 @@ export default function Home() {
         />
       )}
 
-      {/* Tech Stack */}
+      {/* ─── Tech Stack ─── */}
       <section className="py-24 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-20 text-pretty">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 tracking-tight">
             Modern Stack
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {[
               "Node.js",
               "Express.js",
@@ -506,21 +446,21 @@ export default function Home() {
               "JavaScript",
               "MongoDB",
               "JWT",
-              "Docker (microservices)",
-              "PM2 (microservices)",
+              "Zod",
+              "Docker",
+              "PM2",
               "Helmet",
               "CORS",
               "Rate Limiting",
               "Morgan",
-              "Zod (Validation)",
             ].map((tech, idx) => (
               <div
                 key={tech}
-                className="flex items-center justify-center p-4 bg-card/50 rounded-lg border border-border hover:border-accent/50 transition-all duration-300 opacity-0 hover:shadow-md hover:shadow-accent/10"
+                className="glass flex items-center justify-center p-4 rounded-xl hover:border-accent/30 transition-all duration-300 opacity-0 hover:-translate-y-0.5"
                 data-scroll
-                style={{ animationDelay: `${0.05 * idx}s` }}
+                style={{ animationDelay: `${0.04 * idx}s` }}
               >
-                <span className="font-semibold text-sm text-center">
+                <span className="font-medium text-sm text-center">
                   {tech}
                 </span>
               </div>
@@ -529,60 +469,66 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-24 px-4 border-t border-border/50">
+      {/* ─── Final CTA ─── */}
+      <section className="py-24 px-4 border-t border-white/[0.04]">
         <div className="max-w-3xl mx-auto text-center space-y-10">
-          <div className="space-y-4 animate-fade-in-up">
-            <h2 className="text-4xl md:text-5xl font-bold text-pretty">
+          <div className="space-y-4">
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
               Ready to Build?
             </h2>
             <p className="text-lg text-muted-foreground">
               Open source, free, and made for developers by developers.
             </p>
           </div>
-          <div
-            className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in"
-            style={{ animationDelay: "0.2s", animationFillMode: "both" }}
-          >
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => copyCommand()}
-              className="cursor-pointer inline-flex items-center justify-center gap-2 px-8 py-4 bg-accent text-primary font-semibold rounded-lg hover:bg-cyan-300 transition-all duration-200 hover:shadow-lg hover:shadow-accent/50 active:scale-95"
+              className="cursor-pointer inline-flex items-center justify-center gap-2 px-8 py-4 bg-accent text-[#09090b] font-semibold rounded-xl hover:bg-cyan-300 transition-all duration-200 hover:shadow-lg hover:shadow-accent/25 active:scale-[0.98]"
             >
               {copied ? "Copied!" : "Copy Command"}
-              <IconArrow />
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
             </button>
             <a
               href="https://github.com/ALADETAN-IFE/backend-template"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-secondary text-secondary-foreground font-semibold rounded-lg hover:bg-muted transition-all duration-200 border border-border hover:border-accent active:scale-95"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 glass font-semibold rounded-xl hover:border-accent/30 transition-all duration-200 active:scale-[0.98]"
             >
               Star on GitHub
-              <IconGit />
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
             </a>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border/50 py-16 px-4">
+      {/* ─── Footer ─── */}
+      <footer className="border-t border-white/[0.04] py-16 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             <div>
-              <h3 className="font-semibold mb-3">Backend Template</h3>
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-7 h-7 bg-gradient-to-br from-accent to-purple-500 rounded-lg flex items-center justify-center font-bold text-[#09090b] text-xs">
+                  B
+                </div>
+                <h3 className="font-semibold">Backend Template</h3>
+              </div>
               <p className="text-sm text-muted-foreground">
                 Generate production-ready Express APIs instantly.
               </p>
             </div>
             <div>
-              <h3 className="font-semibold mb-3">Links</h3>
-              <ul className="space-y-2 text-sm text-muted-foreground">
+              <h3 className="font-semibold mb-3 text-sm uppercase tracking-wider text-muted-foreground">
+                Links
+              </h3>
+              <ul className="space-y-2 text-sm">
                 <li>
                   <a
                     href="https://github.com/ALADETAN-IFE"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-accent transition"
+                    className="text-muted-foreground hover:text-accent transition"
                   >
                     GitHub Profile
                   </a>
@@ -592,28 +538,40 @@ export default function Home() {
                     href="https://github.com/ALADETAN-IFE/backend-template"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:text-accent transition"
+                    className="text-muted-foreground hover:text-accent transition"
                   >
                     Repository
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://www.npmjs.com/package/@ifecodes/backend-template"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-muted-foreground hover:text-accent transition"
+                  >
+                    npm Package
                   </a>
                 </li>
               </ul>
             </div>
             <div>
-              <h3 className="font-semibold mb-3">License</h3>
+              <h3 className="font-semibold mb-3 text-sm uppercase tracking-wider text-muted-foreground">
+                License
+              </h3>
               <p className="text-sm text-muted-foreground">
-                MIT License • Open Source
+                MIT License · Open Source
               </p>
             </div>
           </div>
-          <div className="border-t border-border/50 pt-8 text-center text-sm text-muted-foreground">
+          <div className="border-t border-white/[0.04] pt-8 text-center text-sm text-muted-foreground">
             <p>
               Made with care by{" "}
               <a
                 href="https://ifecodes.xyz"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-accent hover:underline transition"
+                className="text-accent hover:text-cyan-300 transition"
               >
                 IfeCodes
               </a>
